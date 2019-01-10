@@ -1,0 +1,2 @@
+#!/bin/bash
+java -cp "./lib/runtool-1.0.0-SNAPSHOT.jar:./lib/dependency/commons-exec-1.2.jar:./lib/dependency/commons-io-2.4.jar"  sbst.runtool.Main
