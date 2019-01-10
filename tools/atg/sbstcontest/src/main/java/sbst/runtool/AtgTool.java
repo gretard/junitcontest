@@ -18,7 +18,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,18 +33,31 @@ public class AtgTool implements ITestingTool {
 
 	private PrintStream logOut = null;
 
+	private String prepareCommand;
+
+	private String executeCommand;
+
+	private List<File> extraCp = new ArrayList<File>();
+
 	static final String homeDirName = "."; // current folder
 
 	static final String appJar = String.join(File.separator, homeDirName, "lib", "main.jar");
 
-	static final String tempDir = String.join(File.separator, homeDirName, "temp");
+	static final String baseTempDir = String.join(File.separator, homeDirName, "temp");
 
-	static final String outDir = String.join(File.separator, tempDir, "testcases");
+	static final String outDir = String.join(File.separator, baseTempDir, "testcases");
 
-	static final String tempDataDir = String.join(File.separator, tempDir, "data");
+	static final String tempDir = String.join(File.separator, baseTempDir, "data");
 
-	public AtgTool() {
+	public AtgTool() throws IOException {
 		super();
+		List<String> lines = Files.readAllLines(Paths.get("./run.config"));
+		this.prepareCommand = lines.get(0);
+		this.executeCommand = lines.get(1);
+		if (lines.size() > 2) {
+			extraCp.addAll(Arrays.stream(lines.get(2).split(",")).map(File::new).collect(Collectors.toList()));
+		}
+
 	}
 
 	private File binFile;
@@ -49,15 +65,16 @@ public class AtgTool implements ITestingTool {
 	private File src;
 
 	public List<File> getExtraClassPath() {
-		return new ArrayList<File>();
+		return this.extraCp;
 	}
 
 	public void initialize(File src, File bin, List<File> classPath) {
+
 		this.src = src;
 		this.binFile = bin;
 		this.classPathList = classPath;
+		initDir(baseTempDir);
 		initDir(tempDir);
-		initDir(tempDataDir);
 		initDir(outDir);
 		initOut();
 
@@ -66,17 +83,13 @@ public class AtgTool implements ITestingTool {
 
 		String classes = binFile.getAbsolutePath();
 
-		StringBuffer cmdLine = new StringBuffer();
+		if (this.prepareCommand == null || this.prepareCommand.isEmpty()) {
+			log("Skipping init for tool");
+			return;
+		}
 
-		String javaCommand = buildJavaCommand();
-		cmdLine.append(String.format("%s -Xmx1g -jar %s ", javaCommand, appJar));
-		cmdLine.append(String.format(" -classesDir %s ", classes));
-		cmdLine.append(String.format(" -libs %s ", libs));
-		cmdLine.append(String.format("-mode  INSTRUMENT "));
-		cmdLine.append(String.format(" -resultsDir %s ", outDir));
-		cmdLine.append(String.format(" -baseDir %s ", tempDataDir));
-
-		String cmdToExecute = cmdLine.toString();
+		String cmdToExecute = prepareCommand.replace("{classes}", classes).replace("{src}", src.getAbsolutePath()).replace("{libs}", libs)
+				.replace("{outDir}", outDir).replace("{tempDir}", tempDir);
 		log("Starting tool with: " + cmdToExecute);
 		File homeDir = new File(homeDirName);
 		int retVal = launch(homeDir, cmdToExecute);
@@ -85,31 +98,23 @@ public class AtgTool implements ITestingTool {
 
 	public void run(String cName, long timeBudget) {
 
+		initDir(baseTempDir);
 		initDir(tempDir);
-		initDir(tempDataDir);
 		initDir(outDir);
 		initOut();
-
+		if (this.executeCommand == null || this.executeCommand.isEmpty()) {
+			log("Skipping exec for tool");
+			return;
+		}
 		log("Execution of tool my STARTED");
 		log("user.home=" + homeDirName);
 
-		String libs = String.join(",",
-				classPathList.stream().map(File::getAbsolutePath).collect(Collectors.toList()));
+		String libs = String.join(",", classPathList.stream().map(File::getAbsolutePath).collect(Collectors.toList()));
 
 		String classes = binFile.getAbsolutePath();
 
-		StringBuilder cmdLine = new StringBuilder();
-
-		String javaCommand = buildJavaCommand();
-		cmdLine.append(String.format("%s -Xmx1g -jar %s ", javaCommand, appJar));
-		cmdLine.append(String.format(" -classesDir %s ", classes));
-		cmdLine.append(String.format(" -c %s ", cName));
-		cmdLine.append(String.format(" -libs %s ", libs));
-		cmdLine.append(String.format("-mode GA -timeOutGlobal %s ", (int) (1000 * (timeBudget))));
-		cmdLine.append(String.format(" -resultsDir %s ", outDir));
-		cmdLine.append(String.format(" -baseDir %s ", tempDataDir));
-
-		String cmdToExecute = cmdLine.toString();
+		String cmdToExecute = executeCommand.replace("{classes}", classes).replace("{src}", src.getAbsolutePath()).replace("{libs}", libs)
+				.replace("{classz}", cName).replace("{outDir}", outDir).replace("{tempDir}", tempDir).replace("{timeOut}", timeBudget+""); 
 		log("Starting tool with: " + cmdToExecute);
 		File homeDir = new File(homeDirName);
 		int retVal = launch(homeDir, cmdToExecute);
@@ -119,7 +124,7 @@ public class AtgTool implements ITestingTool {
 
 	private void initOut() {
 		if (logOut == null) {
-			final String logRandoopFileName = String.join(File.separator, tempDir, "log_my_tool.log");
+			final String logRandoopFileName = String.join(File.separator, baseTempDir, "log_my_tool.log");
 			PrintStream outStream;
 			try {
 				outStream = new PrintStream(new FileOutputStream(logRandoopFileName, true));
@@ -138,10 +143,6 @@ public class AtgTool implements ITestingTool {
 			junitOutputDir.mkdirs();
 		}
 		return junitOutputDirName;
-	}
-
-	private String buildJavaCommand() {
-		return "java";
 	}
 
 	private void log(String msg) {

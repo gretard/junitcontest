@@ -13,7 +13,6 @@
   **/
 package sbst.runtool;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -21,7 +20,7 @@ import java.io.Writer;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Throwable {
 		Writer writer = new PrintWriter(System.out);
 		Reader reader = new InputStreamReader(System.in);
 		AtgTool tool = new AtgTool();
