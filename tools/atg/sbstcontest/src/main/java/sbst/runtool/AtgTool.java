@@ -41,8 +41,6 @@ public class AtgTool implements ITestingTool {
 
 	static final String homeDirName = "."; // current folder
 
-	static final String appJar = String.join(File.separator, homeDirName, "lib", "main.jar");
-
 	static final String baseTempDir = String.join(File.separator, homeDirName, "temp");
 
 	static final String outDir = String.join(File.separator, baseTempDir, "testcases");
