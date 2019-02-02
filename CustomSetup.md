@@ -38,3 +38,9 @@ cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./t
 ## evosuite setup
 mkdir ./tools/evosuite/lib
 wget https://github.com/EvoSuite/evosuite/releases/download/v1.0.6/evosuite-1.0.6.jar  -O ./tools/evosuite/lib/evosuite.jar
+cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/evosuite/lib
+
+## randoop setup
+mkdir ./tools/randoop/lib
+https://github.com/randoop/randoop/releases/download/v4.1.0/randoop-all-4.1.0.jar -O ./tools/randoop/lib/randoop.jar
+mvn -DskipTests clean install -f ./tools/randoop/sbstcontest/pom.xml
