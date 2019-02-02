@@ -13,8 +13,24 @@ rm -R *
 git clone https://github.com/JodaOrg/joda-time.git
 git clone https://github.com/JodaOrg/joda-money.git
 git clone https://github.com/jfree/jfreechart.git
+git clone https://github.com/jhy/jsoup.git
 
+
+## compile
+for i in */; do
+  newdir="./${i}/pom.xml"
+  mvn -DskipTests install dependency:copy-dependencies -f $newdir
+done
+
+
+
+# setup
 cd /home/junit
+
+mvn clean install -f ./src/benchgenerator/pom.xml
+java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list"
+
+
 
 
 ## benchmark tool
@@ -22,14 +38,7 @@ mvn -DskipTests clean install -f ./src/benchmarktool/pom.xml
 cp ./src/benchmarktool/target/benchmarktool-1.0.0-shaded.jar /usr/local/bin/lib
 
 
-## MAIN TOOLS setup
-
-
-mvn clean install -f ./src/benchgenerator/pom.xml
-java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list"
-
-
-## universal run tool
+## universal test run tool
 mvn -DskipTests clean install -f ./src/sbstcontest/pom.xml
 mkdir ./tools/atg/lib
 cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/atg/lib
@@ -43,4 +52,8 @@ cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./t
 ## randoop setup
 mkdir ./tools/randoop/lib
 https://github.com/randoop/randoop/releases/download/v4.1.0/randoop-all-4.1.0.jar -O ./tools/randoop/lib/randoop.jar
-mvn -DskipTests clean install -f ./tools/randoop/sbstcontest/pom.xml
+mvn -DskipTests clean install dependency:copy-dependencies -f ./tools/randoop/sbstcontest/pom.xml
+cp ./tools/randoop/sbstcontest/target/dependency/* ./tools/randoop/lib/dependency
+
+## Running
+contest_generate_tests.sh atg 1 1 30
