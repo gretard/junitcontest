@@ -53,12 +53,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
 		</dependency>
-		<dependency>
+	<!-- 	<dependency>
 			<groupId>sbstcontest</groupId>
 			<artifactId>runtool</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-		<dependency>
+	 -->	<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
 			<version>1.9</version>
