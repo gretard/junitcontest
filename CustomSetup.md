@@ -1,0 +1,40 @@
+## Setup
+
+git clone https://github.com/gretard/junitcontest.git
+sudo docker run -v ./junitcontest:/home/junit --name=junitcontest -it dockercontainervm/junitcontest:test
+
+## docker
+apt-get update
+apt-get -y install git maven wget
+
+## projects setup
+cd /var/benchmarks/projects
+rm -R *
+git clone https://github.com/JodaOrg/joda-time.git
+git clone https://github.com/JodaOrg/joda-money.git
+git clone https://github.com/jfree/jfreechart.git
+
+cd /home/junit
+
+
+## benchmark tool
+mvn -DskipTests clean install -f ./src/benchmarktool/pom.xml
+cp ./src/benchmarktool/target/benchmarktool-1.0.0-shaded.jar /usr/local/bin/lib
+
+
+## MAIN TOOLS setup
+
+
+mvn clean install -f ./src/benchgenerator/pom.xml
+java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list"
+
+
+## universal run tool
+mvn -DskipTests clean install -f ./src/sbstcontest/pom.xml
+mkdir ./tools/atg/lib
+cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/atg/lib
+
+
+## evosuite setup
+mkdir ./tools/evosuite/lib
+wget https://github.com/EvoSuite/evosuite/releases/download/v1.0.6/evosuite-1.0.6.jar  -O ./tools/evosuite/lib/evosuite.jar
