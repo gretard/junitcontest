@@ -7,9 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -25,9 +28,28 @@ import javassist.bytecode.ClassFile;
 public class BenchmarksGenerator {
 	private static final Logger log = Logger.getLogger(BenchmarksGenerator.class.getName());
 
+	public static <E> List<E> pickNRandomElements(List<E> list, int n, Random r) {
+		int length = list.size();
+
+		if (length < n)
+			return list;
+
+		// We don't need to shuffle the whole list
+		for (int i = length - 1; i >= length - n; --i) {
+			Collections.swap(list, i, r.nextInt(i + 1));
+		}
+		return list.subList(length - n, length);
+	}
+
+	public static <E> List<E> pickNRandomElements(List<E> list, int n) {
+		return pickNRandomElements(list, n, ThreadLocalRandom.current());
+	}
+
 	public static void main(String[] args) throws IOException {
 		final String baseDir = args.length > 0 ? args[0] : ".";
 		final String outFile = args.length > 1 ? args[1] : "benchmarks.list";
+		final int classesCount = args.length > 2 ? Integer.parseInt(args[2]) : 5;
+
 		final Path readDir = Paths.get(baseDir);
 
 		log.info(() -> String.format("Starting searching %s dir", readDir.toFile().getAbsolutePath()));
@@ -67,17 +89,22 @@ public class BenchmarksGenerator {
 					|| AccessFlag.isPrivate(c.getAccessFlags()))).forEach(c -> {
 						classes.add(c.getName());
 					});
-
+			List<String> selectedClasses = new ArrayList<>();
+			if (count > 0) {
+				selectedClasses.addAll(pickNRandomElements(classes, classesCount));
+			}else {
+				selectedClasses.addAll(classes);
+			}
 			sb.append(String.format("%s={%n", projectName));
 			sb.append(String.format(" src=%s%n", src.getAbsolutePath()));
 			sb.append(String.format(" bin=%s%n", classesDir.getAbsolutePath()));
-			sb.append(String.format(" classes=(%s)%n", String.join(",", classes)));
+			sb.append(String.format(" classes=(%s)%n", String.join(",", selectedClasses)));
 			sb.append(String.format(" classpath=(%s)%n", String.join(",", classpath)));
 
 			sb.append(String.format("}%n"));
 
 			log.info(() -> String.format("Added benchmark %s with %s classes for benchmarking", projectName,
-					classes.size()));
+					selectedClasses.size()));
 		}
 		sb.append("}");
 
