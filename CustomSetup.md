@@ -61,8 +61,7 @@ cd /home/junit
 
 mkdir ./tools/evosuite/lib
 wget https://github.com/EvoSuite/evosuite/releases/download/v1.0.6/evosuite-1.0.6.jar  -O ./tools/evosuite/lib/evosuite.jar
-cp 
-./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/evosuite/lib
+cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/evosuite/lib
 ```
 ## Randoop setup
 ```
@@ -81,4 +80,5 @@ cd /home/junit/tools/TOOL
 
 contest_generate_tests.sh atg 1 1 30
 contest_compute_metrics.sh results_atg_30 
+contest_transcript_single.sh .
 ```
