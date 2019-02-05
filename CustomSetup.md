@@ -75,7 +75,7 @@ cp ./tools/randoop/sbstcontest/target/dependency/* ./tools/randoop/lib/dependenc
 
 ## Running experiments
 ```
-cd /home/junit/tools/TOOL
+cd /home/junit/tools/atg
 
 
 contest_generate_tests.sh atg 1 1 30
