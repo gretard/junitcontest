@@ -42,7 +42,7 @@ import org.apache.commons.lang.StringUtils;
 import sbst.runtool.SBSTChannel;
 
 public class RunTool {
-	private static final double EXTRA_TIME_FACTOR = 1.00;
+	private static final double EXTRA_TIME_FACTOR = 2.00;
 
 	private final File homeDir;
 	private final File executable;
