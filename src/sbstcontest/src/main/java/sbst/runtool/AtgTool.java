@@ -53,7 +53,7 @@ public class AtgTool implements ITestingTool {
 		this.prepareCommand = lines.get(0);
 		this.executeCommand = lines.get(1);
 		if (lines.size() > 2) {
-			extraCp.addAll(Arrays.stream(lines.get(2).split(",")).map(File::new).collect(Collectors.toList()));
+			extraCp.addAll(Arrays.stream(lines.get(2).split(File.pathSeparator)).map(File::new).collect(Collectors.toList()));
 		}
 
 	}
@@ -76,7 +76,7 @@ public class AtgTool implements ITestingTool {
 		initDir(outDir);
 		initOut();
 
-		String libs = String.join(",",
+		String libs = String.join(File.pathSeparator,
 				classPathList.stream().map(x -> x.getAbsolutePath()).collect(Collectors.toList()));
 
 		String classes = binFile.getAbsolutePath();
