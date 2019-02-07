@@ -39,6 +39,8 @@ public class AtgTool implements ITestingTool {
 
 	private List<File> extraCp = new ArrayList<File>();
 
+	private String separatorChar;
+
 	static final String homeDirName = "."; // current folder
 
 	static final String baseTempDir = String.join(File.separator, homeDirName, "temp");
@@ -50,10 +52,11 @@ public class AtgTool implements ITestingTool {
 	public AtgTool() throws IOException {
 		super();
 		List<String> lines = Files.readAllLines(Paths.get("./run.config"));
-		this.prepareCommand = lines.get(0);
-		this.executeCommand = lines.get(1);
-		if (lines.size() > 2) {
-			extraCp.addAll(Arrays.stream(lines.get(2).split(File.pathSeparator)).map(File::new).collect(Collectors.toList()));
+		this.separatorChar = lines.get(0).isEmpty() ? File.pathSeparator : lines.get(0).trim();
+		this.prepareCommand = lines.get(1);
+		this.executeCommand = lines.get(2);
+		if (lines.size() > 3) {
+			extraCp.addAll(Arrays.stream(lines.get(3).split(separatorChar)).map(File::new).collect(Collectors.toList()));
 		}
 
 	}
@@ -76,7 +79,7 @@ public class AtgTool implements ITestingTool {
 		initDir(outDir);
 		initOut();
 
-		String libs = String.join(File.pathSeparator,
+		String libs = String.join(separatorChar,
 				classPathList.stream().map(x -> x.getAbsolutePath()).collect(Collectors.toList()));
 
 		String classes = binFile.getAbsolutePath();
@@ -107,7 +110,7 @@ public class AtgTool implements ITestingTool {
 		log("Execution of tool my STARTED");
 		log("user.home=" + homeDirName);
 
-		String libs = String.join(",", classPathList.stream().map(File::getAbsolutePath).collect(Collectors.toList()));
+		String libs = String.join(separatorChar, classPathList.stream().map(File::getAbsolutePath).collect(Collectors.toList()));
 
 		String classes = binFile.getAbsolutePath();
 
