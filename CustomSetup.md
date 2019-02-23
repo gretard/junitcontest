@@ -75,6 +75,8 @@ cp ./tools/randoop/sbstcontest/target/dependency/* ./tools/randoop/lib/dependenc
 
 ## Running experiments
 ```
+docker start junitcontest
+docker attach junitcontest
 cd /home/junit/tools/atg
 
 
