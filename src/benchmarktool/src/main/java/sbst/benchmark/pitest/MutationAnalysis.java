@@ -15,6 +15,7 @@ package sbst.benchmark.pitest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,17 +49,22 @@ public class MutationAnalysis {
 	public MutationAnalysis(MutationSet set, JacocoResult result) {
 		this.generatedMutants = set;
 		// take the coverage results from Jacoco
-		Set<Integer> coveredLines = result.getCoveredLines();
+		Set<Integer> coveredLines = new HashSet<>();
+		if (result != null) {
+			coveredLines = result.getCoveredLines();
+		}
 
 		Main.debug("Matching Jacoco with PIT: find covered mutations");
 		coveredMutants = new MutationSet();
 		uncoveredMutants = new MutationSet();
-		for (MutationIdentifier id : this.generatedMutants.getMutationIDs()){
+		for (MutationIdentifier id : this.generatedMutants.getMutationIDs()) {
 			MutationDetails detail = this.generatedMutants.getMutantionDetails(id);
 			if (coveredLines.contains(detail.getClassLine().getLineNumber()))
-				coveredMutants.addMutant(id, this.generatedMutants.getMutantion(id), this.generatedMutants.getMutantionDetails(id));
+				coveredMutants.addMutant(id, this.generatedMutants.getMutantion(id),
+						this.generatedMutants.getMutantionDetails(id));
 			else
-				uncoveredMutants.addMutant(id, this.generatedMutants.getMutantion(id), this.generatedMutants.getMutantionDetails(id));
+				uncoveredMutants.addMutant(id, this.generatedMutants.getMutantion(id),
+						this.generatedMutants.getMutantionDetails(id));
 		}
 
 		this.killData = new HashMap<MutationIdentifier, Boolean>();
@@ -67,11 +73,13 @@ public class MutationAnalysis {
 
 	/**
 	 * Add killed/covered mutation
-	 * @param mutant mutation being covered
+	 * 
+	 * @param mutant
+	 *            mutation being covered
 	 */
-	public void addKilledMutant(MutationDetails mutant, TestInfo info){
+	public void addKilledMutant(MutationDetails mutant, TestInfo info) {
 		this.killData.put(mutant.getId(), true);
-		if (this.coveringTests.containsKey(mutant.getId())){
+		if (this.coveringTests.containsKey(mutant.getId())) {
 			// if the list already exists
 			this.coveringTests.get(mutant.getId()).add(info);
 		} else {
@@ -84,22 +92,24 @@ public class MutationAnalysis {
 
 	/**
 	 * Add mutation as uncovered/non-killed
-	 * @param mutant mutation being covered
+	 * 
+	 * @param mutant
+	 *            mutation being covered
 	 */
-	public void addAliveMutant(MutationDetails mutant){		
-                Boolean killed = this.killData.get(mutant.getId());
-                if (killed == null || !killed) // if it was killed => ignore
-                        this.killData.put(mutant.getId(), false);		
+	public void addAliveMutant(MutationDetails mutant) {
+		Boolean killed = this.killData.get(mutant.getId());
+		if (killed == null || !killed) // if it was killed => ignore
+			this.killData.put(mutant.getId(), false);
 	}
 
-	public int getNumberOfMutations(){
+	public int getNumberOfMutations() {
 		return this.generatedMutants.getNumberOfMutations();
 	}
 
-	public int numberOfKilledMutation(){
+	public int numberOfKilledMutation() {
 		int count = 0;
-		for (MutationIdentifier id : this.generatedMutants.getMutationIDs()){
-			if (killData.containsKey(id)){
+		for (MutationIdentifier id : this.generatedMutants.getMutationIDs()) {
+			if (killData.containsKey(id)) {
 				if (this.killData.get(id))
 					count++;
 			}
@@ -107,34 +117,36 @@ public class MutationAnalysis {
 		return count;
 	}
 
-	public int numberOfUncoveredMutation(){
+	public int numberOfUncoveredMutation() {
 		return this.uncoveredMutants.getNumberOfMutations();
 	}
 
-	public int numberOfALiveMutation(){
+	public int numberOfALiveMutation() {
 		int count = 0;
-		for (MutationIdentifier id : this.coveredMutants.getMutationIDs()){
+		for (MutationIdentifier id : this.coveredMutants.getMutationIDs()) {
 			if (!this.killData.get(id))
 				count++;
 		}
 		return count;
 	}
 
-	public void printCoverageInfo(){
+	public void printCoverageInfo() {
 		System.out.println(toString());
 	}
 
 	@Override
-	public String toString(){
-		String info = "N. of generated mutants "+this.getNumberOfMutations()+"\n";
-		info = info + "N. of covered mutants "+this.getNumberOfCoveredMutants()+"\n";
-		info = info + "N. of killed mutants "+this.numberOfKilledMutation()+"\n";
+	public String toString() {
+		String info = "N. of generated mutants " + this.getNumberOfMutations() + "\n";
+		info = info + "N. of covered mutants " + this.getNumberOfCoveredMutants() + "\n";
+		info = info + "N. of killed mutants " + this.numberOfKilledMutation() + "\n";
 		String mutation_list = "";
 		String test_info = "";
 		int count = 0;
-		for (MutationIdentifier id : this.coveringTests.keySet()){
-			mutation_list = mutation_list + "Mutant: "+count+", killed by tests "+this.coveringTests.get(id)+"\n";
-			test_info = test_info +  "Mutant: "+count+"\t ---> "+this.generatedMutants.getMutantionDetails(id)+"\n";
+		for (MutationIdentifier id : this.coveringTests.keySet()) {
+			mutation_list = mutation_list + "Mutant: " + count + ", killed by tests " + this.coveringTests.get(id)
+					+ "\n";
+			test_info = test_info + "Mutant: " + count + "\t ---> " + this.generatedMutants.getMutantionDetails(id)
+					+ "\n";
 			count++;
 		}
 		info = info + "\n\n --- Tests killing mutants --- \n ";
@@ -144,30 +156,30 @@ public class MutationAnalysis {
 		return info;
 	}
 
-	public boolean isMutantKilled(MutationIdentifier id){
-		if (this.killData.containsKey(id)){
+	public boolean isMutantKilled(MutationIdentifier id) {
+		if (this.killData.containsKey(id)) {
 			return this.killData.get(id);
 		}
 		return false;
 	}
 
-	public void deleteFlakyTest(Set<TestInfo> flaky){
-		for (MutationIdentifier id : this.coveringTests.keySet()){
+	public void deleteFlakyTest(Set<TestInfo> flaky) {
+		for (MutationIdentifier id : this.coveringTests.keySet()) {
 			List<TestInfo> killingTests = this.coveringTests.get(id);
 
 			// from the set of Killing tests, we remove remove flaky tests
 			// i.e., tests that already fail in the original SUT
-			for (TestInfo flaky_test : flaky){
+			for (TestInfo flaky_test : flaky) {
 				if (killingTests.contains(flaky_test))
 					killingTests.remove(flaky_test);
 			}
 
-                        if (killingTests.size() == 0){
-                                //this.killData.put(id, false);
-                                MutationDetails detail = this.generatedMutants.getMutantionDetails(id);
-                                this.addAliveMutant(detail);
-                        }
-			
+			if (killingTests.size() == 0) {
+				// this.killData.put(id, false);
+				MutationDetails detail = this.generatedMutants.getMutantionDetails(id);
+				this.addAliveMutant(detail);
+			}
+
 		}
 	}
 

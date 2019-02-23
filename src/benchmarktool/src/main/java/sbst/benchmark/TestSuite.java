@@ -279,6 +279,7 @@ public class TestSuite {
 			} catch (Throwable t) {
 				Main.info("Failed to compile '" + f + "'!");
 				t.printStackTrace(Main.debugStr);
+				compiledTestSrcFiles.remove(f);
 			}
 		}
 	}
@@ -431,18 +432,20 @@ public class TestSuite {
 
 		Main.info("\n=== Run Jacoco for Coverage ===");
 		try {
-			//System.out.println("HERE >>>> "+ testCaseDir);
-			//System.out.println("HERE >>>> "+ testCaseDir.getParent());
-			//System.out.println("HERE >>>> "+ getTestCaseBinDir(testCaseDir));
-			//System.out.println("HERE >>>> "+ getTask().getClassPath());
-			//System.out.println("HERE >>>> "+ getExtraCP());
-			//System.out.println("HERE >>>> "+Main.JUNIT_DEP_JAR+" : "+Main.JUNIT_JAR);
+			System.out.println("Running Jacoco for "+cut);
+			System.out.println("HERE >>>> "+ testCaseDir);
+			System.out.println("HERE >>>> "+ testCaseDir.getParent());
+			System.out.println("HERE >>>> "+ getTestCaseBinDir(testCaseDir));
+			System.out.println("HERE >>>> "+ getTask().getClassPath());
+			System.out.println("HERE >>>> "+ getExtraCP());
+			System.out.println("HERE >>>> "+Main.JUNIT_DEP_JAR+" : "+Main.JUNIT_JAR);
 
 			JaCoCoLauncher launcher = new JaCoCoLauncher(this.getTestCaseBinDir(testCaseDir).getParent());
 
 			launcher.setTestFolder(getTestCaseBinDir(testCaseDir).getAbsolutePath());
 
 			List<String> testClasses = getCompiledTestClassNames();
+			Main.info("\nRunning tests: "+String.join(",", testClasses));  
 			launcher.setTestCase(testClasses);
 
 			launcher.setJarInstrument(getTask().getClassPath());
@@ -454,20 +457,24 @@ public class TestSuite {
 			launcher.runJaCoCo();
 
 			JacocoResult result = launcher.getResults();
-			result.printResults();
-
-			// Count number of failing tests (HOW MUCH REAL FAULTS ARE DETECTED?)
-			d4jFailTests = 0;
+			
 
 			// coverage metrics
 			if (result != null) {
+				result.printResults();
+
+				// Count number of failing tests (HOW MUCH REAL FAULTS ARE DETECTED?)
+				d4jFailTests = 0;
 				this.d4jLinesTotal = result.getLinesTotal();
 				this.d4jLinesCovered = result.getLinesCovered();
 				this.d4jConditionsTotal = result.getBranchesTotal();
 				this.d4jConditionsCovered = result.getBranchesCovered();
+				// keep track of the uncovered lines for mutation analysis
+				this.jacoco_result = result;
+				Main.info("Jacoco resulted coverage: "+result);
+			}else {
+				Main.info("Jacoco resulted in no coverage");
 			}
-			// keep track of the uncovered lines for mutation analysis
-			this.jacoco_result = result;
 
 		} catch (Throwable t) {
 			Main.info("Could not calculate coverage metrics!");
@@ -484,19 +491,20 @@ public class TestSuite {
 			String cp = new Util.CPBuilder().and(Main.JUNIT_JAR).and(Main.JUNIT_DEP_JAR).and(getTask().getClassPath())
 					.and(getExtraCP()).and(getTestCaseBinDir(testCaseDir).getAbsolutePath()).build();
 
-			List<String> testClasses = getTestSrcFiles(testCaseDir);
+		//	List<String> testClasses = getTestSrcFiles(testCaseDir);
+			List<String> fixedTestClasses = getCompiledTestClassNames();
 
-			List<String> fixedTestClasses = new ArrayList<String>();
+			/*List<String> fixedTestClasses = new ArrayList<String>();
 			for (int index = 0; index < testClasses.size(); index++){
 				if (!testClasses.get(index).contains(DUMMY_JUNIT_CLASS)){
 					String element = testClasses.get(index);
 					element = element.replace("/", ".");
 					if (element.startsWith("testcases."))
 						element = element.replace("testcases.","");
-					element = element.substring(0, element.length()-5);//replace(".java","");
+					//element = element.substring(0, element.length()-5);//replace(".java","");
 					fixedTestClasses.add(element);
 				}
-			}
+			}*/
 
 			Main.debug(" Running tests against generated Mutants");
 			Main.debug("Running PITWrapper with the following data:");
