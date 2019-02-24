@@ -111,10 +111,10 @@ public class AtgTool implements ITestingTool {
 		log("user.home=" + homeDirName);
 
 		String libs = String.join(separatorChar, classPathList.stream().map(File::getAbsolutePath).collect(Collectors.toList()));
-
+		
 		String classes = binFile.getAbsolutePath();
-
-		String cmdToExecute = executeCommand.replace("{classes}", classes).replace("{src}", src.getAbsolutePath()).replace("{libs}", libs)
+		String packageName = cName.substring(0, cName.lastIndexOf("."));
+		String cmdToExecute = executeCommand.replace("{classes}", classes).replace("{packName}", packageName).replace("{src}", src.getAbsolutePath()).replace("{libs}", libs)
 				.replace("{classz}", cName).replace("{outDir}", outDir).replace("{tempDir}", tempDir).replace("{timeOut}", timeBudget+""); 
 		log("Starting tool with: " + cmdToExecute);
 		File homeDir = new File(homeDirName);

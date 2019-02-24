@@ -49,6 +49,7 @@ public class BenchmarksGenerator {
 		final String baseDir = args.length > 0 ? args[0] : ".";
 		final String outFile = args.length > 1 ? args[1] : "benchmarks.list";
 		final int classesCount = args.length > 2 ? Integer.parseInt(args[2]) : 5;
+		final boolean singleClassInBench = args.length > 3 ? Boolean.parseBoolean(args[3]) : false;
 
 		final Path readDir = Paths.get(baseDir);
 
@@ -56,7 +57,8 @@ public class BenchmarksGenerator {
 		int count = 0;
 
 		final List<Path> projects = new LinkedList<>();
-		try (Stream<Path> pathsStream = Files.find(readDir, 1, (path, attributes) -> attributes.isDirectory())) {
+		try (Stream<Path> pathsStream = Files.find(readDir, 1, (path, attributes) -> attributes.isDirectory() && 
+				!path.endsWith("_skip"))) {
 			pathsStream.sorted().forEach(p -> projects.add(p));
 		}
 

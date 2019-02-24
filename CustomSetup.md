@@ -1,7 +1,7 @@
 ## Setup
 ```
 git clone https://github.com/gretard/junitcontest.git
-sudo docker run -v ./junitcontest:/home/junit --name=junitcontest -it dockercontainervm/junitcontest:test
+sudo docker run -v /vagrant/junitcontest:/home/junit --name=junitcontest -it dockercontainervm/junitcontest:test
 ```
 ## docker
 ```
