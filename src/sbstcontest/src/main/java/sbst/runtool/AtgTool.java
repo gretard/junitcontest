@@ -165,10 +165,10 @@ public class AtgTool implements ITestingTool {
 			executor.setWorkingDirectory(baseDir);
 		}
 
-		int exitValue;
+		
 		try {
 			log("Spawning new process of command " + cmdString);
-			exitValue = executor.execute(CommandLine.parse(cmdString));
+			int exitValue = executor.execute(CommandLine.parse(cmdString));
 			log("Execution of subprocess finished with ret_code " + exitValue);
 			return exitValue;
 		} catch (IOException e) {

@@ -34,7 +34,6 @@ public class BenchmarksGenerator {
 		if (length < n)
 			return list;
 
-		// We don't need to shuffle the whole list
 		for (int i = length - 1; i >= length - n; --i) {
 			Collections.swap(list, i, r.nextInt(i + 1));
 		}
@@ -57,8 +56,8 @@ public class BenchmarksGenerator {
 		int count = 0;
 
 		final List<Path> projects = new LinkedList<>();
-		try (Stream<Path> pathsStream = Files.find(readDir, 1, (path, attributes) -> attributes.isDirectory() && 
-				!path.endsWith("_skip"))) {
+		try (Stream<Path> pathsStream = Files.find(readDir, 1,
+				(path, attributes) -> attributes.isDirectory() && !path.endsWith("_skip"))) {
 			pathsStream.sorted().forEach(p -> projects.add(p));
 		}
 
@@ -94,8 +93,22 @@ public class BenchmarksGenerator {
 			List<String> selectedClasses = new ArrayList<>();
 			if (count > 0) {
 				selectedClasses.addAll(pickNRandomElements(classes, classesCount));
-			}else {
+			} else {
 				selectedClasses.addAll(classes);
+			}
+			if (singleClassInBench) {
+
+				for (int i = 0; i < selectedClasses.size(); i++) {
+					String selectedClass = selectedClasses.get(i);
+					sb.append(String.format("%s-%s={%n", projectName, i));
+					sb.append(String.format(" src=%s%n", src.getAbsolutePath()));
+					sb.append(String.format(" bin=%s%n", classesDir.getAbsolutePath()));
+					sb.append(String.format(" classes=(%s)%n", String.join(",", selectedClass)));
+					sb.append(String.format(" classpath=(%s)%n", String.join(",", classpath)));
+
+					sb.append(String.format("}%n"));
+				}
+				continue;
 			}
 			sb.append(String.format("%s={%n", projectName));
 			sb.append(String.format(" src=%s%n", src.getAbsolutePath()));
