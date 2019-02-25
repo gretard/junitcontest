@@ -57,7 +57,7 @@ public class BenchmarksGenerator {
 
 		final List<Path> projects = new LinkedList<>();
 		try (Stream<Path> pathsStream = Files.find(readDir, 1,
-				(path, attributes) -> attributes.isDirectory() && !path.endsWith("_skip"))) {
+				(path, attributes) -> attributes.isDirectory() && !path.toString().endsWith("_skip"))) {
 			pathsStream.sorted().forEach(p -> projects.add(p));
 		}
 
