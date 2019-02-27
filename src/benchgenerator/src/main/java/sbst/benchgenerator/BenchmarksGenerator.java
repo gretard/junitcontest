@@ -76,7 +76,7 @@ public class BenchmarksGenerator {
 			final Set<String> selectedClasses = new TreeSet<>();
 			if (count > 0) {
 				Collections.shuffle(classes);
-				selectedClasses.addAll(classes.subList(0, Math.min(selectedClasses.size(), classesCount)));
+				selectedClasses.addAll(classes.subList(0, Math.min(classes.size(), classesCount)));
 			} else {
 				selectedClasses.addAll(classes);
 			}
