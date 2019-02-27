@@ -10,9 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -27,22 +26,6 @@ import javassist.bytecode.ClassFile;
  */
 public class BenchmarksGenerator {
 	private static final Logger log = Logger.getLogger(BenchmarksGenerator.class.getName());
-
-	public static <E> List<E> pickNRandomElements(List<E> list, int n, Random r) {
-		int length = list.size();
-
-		if (length < n)
-			return list;
-
-		for (int i = length - 1; i >= length - n; --i) {
-			Collections.swap(list, i, r.nextInt(i + 1));
-		}
-		return list.subList(length - n, length);
-	}
-
-	public static <E> List<E> pickNRandomElements(List<E> list, int n) {
-		return pickNRandomElements(list, n, ThreadLocalRandom.current());
-	}
 
 	public static void main(String[] args) throws IOException {
 		final String baseDir = args.length > 0 ? args[0] : ".";
@@ -85,37 +68,36 @@ public class BenchmarksGenerator {
 
 			final ClasspathScanner scanner = new ClasspathScanner();
 			scanner.scanFrom(classesDir.toPath());
-			Set<ClassFile> classesFiles = scanner.getClasses();
+			final Set<ClassFile> classesFiles = scanner.getClasses();
 			classesFiles.stream().filter(c -> !(c.isAbstract() || c.isInterface() || c.getName().contains("$")
 					|| AccessFlag.isPrivate(c.getAccessFlags()))).forEach(c -> {
 						classes.add(c.getName());
 					});
-			List<String> selectedClasses = new ArrayList<>();
+			final Set<String> selectedClasses = new TreeSet<>();
 			if (count > 0) {
-				selectedClasses.addAll(pickNRandomElements(classes, classesCount));
+				Collections.shuffle(classes);
+				selectedClasses.addAll(classes.subList(0, Math.min(selectedClasses.size(), classesCount)));
 			} else {
 				selectedClasses.addAll(classes);
 			}
 			if (singleClassInBench) {
-
-				for (int i = 0; i < selectedClasses.size(); i++) {
-					String selectedClass = selectedClasses.get(i);
-					sb.append(String.format("%s-%s={%n", projectName, i));
+				int i = 0;
+				for (String selectedClass : selectedClasses) {
+					sb.append(String.format("%s-%s={%n", projectName, i++));
 					sb.append(String.format(" src=%s%n", src.getAbsolutePath()));
 					sb.append(String.format(" bin=%s%n", classesDir.getAbsolutePath()));
 					sb.append(String.format(" classes=(%s)%n", String.join(",", selectedClass)));
 					sb.append(String.format(" classpath=(%s)%n", String.join(",", classpath)));
-
 					sb.append(String.format("}%n"));
 				}
 				continue;
+
 			}
 			sb.append(String.format("%s={%n", projectName));
 			sb.append(String.format(" src=%s%n", src.getAbsolutePath()));
 			sb.append(String.format(" bin=%s%n", classesDir.getAbsolutePath()));
 			sb.append(String.format(" classes=(%s)%n", String.join(",", selectedClasses)));
 			sb.append(String.format(" classpath=(%s)%n", String.join(",", classpath)));
-
 			sb.append(String.format("}%n"));
 
 			log.info(() -> String.format("Added benchmark %s with %s classes for benchmarking", projectName,
