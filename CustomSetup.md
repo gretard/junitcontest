@@ -33,6 +33,10 @@ cd /home/junit
 
 mvn clean install -f ./src/benchgenerator/pom.xml
 java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list"
+
+mvn clean install -f ./src/pit-runner/pom.xml
+cp ./src/pit-runner/target/*.jar ./tools/
+
 ```
 
 
@@ -83,4 +87,17 @@ cd /home/junit/tools/atg
 contest_generate_tests.sh atg 1 1 30
 contest_compute_metrics.sh results_atg_30 
 contest_transcript_single.sh .
+
+```
+
+```
+mkdir /home/junit/libs
+cd /home/junit/libs
+wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pitest-1.4.5.jar
+wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pitest-command-line-1.4.5.jar
+wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pitest-entry-1.4.5.jar
+
+
+cd /home/junit/tools
+java -jar runner-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 ```
