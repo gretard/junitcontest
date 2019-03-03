@@ -262,6 +262,10 @@ public class App {
 
 			line.addArgument("--timestampedReports");
 			line.addArgument("false");
+			line.addArgument("--exportLineCoverage");
+			line.addArgument("true");
+			line.addArgument("--mutators");
+			line.addArgument("ALL");
 			line.addArgument("--targetClasses");
 			line.addArgument(String.join(",", request.bench.classes));
 			line.addArgument("--targetTests");
