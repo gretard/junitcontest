@@ -101,3 +101,14 @@ wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pite
 cd /home/junit/tools
 java -jar runner-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 ```
+
+```
+select 
+COLUMNS[1] as tool,
+COLUMNS[2] as budget,
+COLUMNS[4] as classz,
+COLUMNS[5] as mutationType,
+COLUMNS[5] || '_' || COLUMNS[4] || '_' || COLUMNS[6] ||  '_' || COLUMNS[7] as mutationId,
+COLUMNS[8] as status
+from dfs.`/home/junit/tools/summary.txt`
+```
