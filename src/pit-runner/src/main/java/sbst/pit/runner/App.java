@@ -8,13 +8,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.plist.PropertyListConfiguration;
-import org.apache.commons.configuration.tree.ConfigurationNode;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -44,6 +40,7 @@ public class App {
 
 		public List<String> getAllCps() {
 			List<String> cps = new ArrayList<>();
+			cps.addAll(extra);
 			for (String x : bench.classpath) {
 				String t = x;
 				if (x.endsWith("dependency")) {
@@ -51,20 +48,21 @@ public class App {
 				}
 				cps.add(t);
 			}
-			cps.addAll(extra);
+
 			return cps;
 		}
 
 		public List<String> getAllCpsForPit() {
 			List<String> cps = new ArrayList<>();
+			cps.addAll(extra);
 			for (String x : bench.classpath) {
+
 				String t = x;
 				if (x.endsWith("dependency")) {
 					t = x + File.separator + "*";
 				}
 				cps.add(t);
 			}
-			cps.addAll(extra);
 			cps.add(testBinDir);
 			return cps;
 		}
@@ -227,8 +225,6 @@ public class App {
 			f.getParentFile().mkdirs();
 		}
 	}
-
-
 
 	public static int runPit(CompileRequest request, Path log) {
 		try {
