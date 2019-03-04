@@ -70,14 +70,6 @@ public class App {
 		}
 	}
 
-	private static class Bench {
-		public String name;
-		public String src;
-		public List<String> classes = new ArrayList<>();
-		public List<String> classpath = new ArrayList<>();
-
-	}
-
 	public static void main(String[] args) throws Throwable {
 		final boolean force = args.length > 0 ? Boolean.parseBoolean(args[0]) : false;
 		String baseDir = ".";
@@ -98,7 +90,7 @@ public class App {
 			configFile = args[3];
 		}
 
-		final Map<String, Bench> benchmarks = getBenchmarks(configFile);
+		final Map<String, Bench> benchmarks = Utils.getBenchmarks(configFile);
 		final File summaryOutFile = new File(baseDir, "summary.txt");
 		summaryOutFile.delete();
 
@@ -236,22 +228,7 @@ public class App {
 		}
 	}
 
-	private static Map<String, Bench> getBenchmarks(String configFile) throws ConfigurationException {
-		PropertyListConfiguration benchmarkList = new PropertyListConfiguration();
-		benchmarkList.load(new File(configFile));
-		Map<String, Bench> exes = new HashMap<>();
 
-		for (ConfigurationNode child : benchmarkList.getRoot().getChildren()) {
-			Bench b = new Bench();
-			b.name = child.getName();
-			b.src = (String) child.getChildren("src").get(0).getValue();
-			b.classpath.addAll((List<String>) child.getChildren("classpath").get(0).getValue());
-			b.classes.addAll((List<String>) child.getChildren("classes").get(0).getValue());
-			exes.put(b.name, b);
-
-		}
-		return exes;
-	}
 
 	public static int runPit(CompileRequest request, Path log) {
 		try {
