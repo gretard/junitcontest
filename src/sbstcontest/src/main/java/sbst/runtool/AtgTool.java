@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.FileUtils;
 
 public class AtgTool implements ITestingTool {
 
@@ -122,8 +123,30 @@ public class AtgTool implements ITestingTool {
 		log("Starting tool with: " + cmdToExecute);
 		File homeDir = new File(homeDirName);
 		int retVal = launch(homeDir, cmdToExecute);
+		File binDir = Paths.get(tempDir, "binaries").toFile();
+		if (binDir.exists()) {
+			log("Deleted data bin dir " +binDir.getAbsolutePath());
+			try {
+				FileUtils.deleteDirectory(binDir);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		File dataDir = Paths.get(tempDir, "data" ).toFile();
+		if (dataDir.exists()) {
+			log("Deleted data temp dir "+dataDir.getAbsolutePath());
+			try {
+				FileUtils.deleteDirectory(dataDir);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		log("Execution finished with exit code " + retVal);
 		log("Execution of tool my FINISHED");
+		
+	
 	}
 
 	private void initOut() {
