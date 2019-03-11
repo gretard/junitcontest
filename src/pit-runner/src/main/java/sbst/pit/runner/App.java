@@ -23,10 +23,25 @@ import sbst.pit.runner.models.Bench;
  *
  */
 public class App {
+	public static enum Modes {
+		METRICS(1), MUTATIONS(2), FORCE(4), DEFAULT(3), ALL(8);
+
+		private final int mode;
+
+		public int getMode() {
+			return mode;
+		}
+
+		private Modes(int mode) {
+			this.mode = mode;
+
+		}
+	}
 
 	public static void main(String[] args) throws Throwable {
 		System.out.println("Usage: force baseDir libsDir projectsConfigFile");
-		final boolean force = args.length > 0 ? Boolean.parseBoolean(args[0]) : false;
+		final Modes mode = args.length > 0 ? Modes.valueOf(args[0].toUpperCase()) : Modes.DEFAULT;
+
 		final String baseDir = args.length > 1 ? args[1] : ".";
 		String configFile = "/var/benchmarks/conf/benchmarks.list";
 
@@ -42,10 +57,16 @@ public class App {
 			configFile = args[3];
 		}
 
-		compileAndRunPit(configFile, force, baseDir, libsDir);
-		checkMutationsReports(Paths.get(baseDir, "summary.csv"), Paths.get(baseDir));
-		collectMetrics(baseDir);
-		collectBencharmkMetrics(baseDir, configFile);
+		if ((Modes.MUTATIONS.getMode() & mode.getMode()) == Modes.MUTATIONS.getMode()) {
+			compileAndRunPit(configFile, (Modes.FORCE.getMode() & mode.getMode()) == Modes.FORCE.getMode(), baseDir,
+					libsDir);
+			checkMutationsReports(Paths.get(baseDir, "summary.csv"), Paths.get(baseDir));
+		}
+
+		if ((Modes.METRICS.getMode() & mode.getMode()) == Modes.METRICS.getMode()) {
+			collectMetrics(baseDir);
+			collectBencharmkMetrics(baseDir, configFile);
+		}
 	}
 
 	private static void collectBencharmkMetrics(final String baseDir, String configFile) throws ConfigurationException {
@@ -55,6 +76,8 @@ public class App {
 		Utils.deleteOld(Paths.get(baseDir, "metrics.csv"), false);
 		File metricsFile = Paths.get(baseDir, "metrics.csv").toFile();
 		benchmarks.forEach((k, v) -> {
+			v.additionalInfo = k+"\t";
+			v.additionalInfoHeader = "benchmark\t";
 			collector.collectMetrics(v, metricsFile);
 		});
 
