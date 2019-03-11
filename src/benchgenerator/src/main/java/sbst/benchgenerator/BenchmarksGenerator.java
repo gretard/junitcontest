@@ -15,6 +15,8 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
+
 import com.github.baev.ClasspathScanner;
 
 import javassist.bytecode.AccessFlag;
@@ -32,7 +34,9 @@ public class BenchmarksGenerator {
 		final String outFile = args.length > 1 ? args[1] : "benchmarks.list";
 		final int classesCount = args.length > 2 ? Integer.parseInt(args[2]) : 5;
 		final boolean singleClassInBench = args.length > 3 ? Boolean.parseBoolean(args[3]) : false;
-
+		final String reportFile = args.length > 4 ? args[4] : "./benchmark-stats.csv";
+		FileUtils.write(Paths.get(reportFile).toFile(), "project\ttotal\tclasses\tselected\r\n", false);
+		
 		final Path readDir = Paths.get(baseDir);
 
 		log.info(() -> String.format("Starting searching %s dir", readDir.toFile().getAbsolutePath()));
@@ -51,8 +55,8 @@ public class BenchmarksGenerator {
 			final File classesDir = Paths.get(project.toFile().getAbsolutePath(), "target", "classes").toFile();
 			final File src = Paths.get(project.toFile().getAbsolutePath(), "src", "main", "java").toFile();
 			if (!classesDir.exists() || !src.exists()) {
-				log.info(() -> String.format("Skipping dir %s as no source or compiled classes were found",
-						project.getFileName().toString()));
+				log.info(() -> String.format("Skipping dir %s as no source or compiled classes were found at %s",
+						project.getFileName().toString(), classesDir.getAbsolutePath()));
 				continue;
 			}
 			final String projectName = String.format("%s-%s", project.getFileName().toString().toUpperCase(), ++count);
@@ -80,6 +84,9 @@ public class BenchmarksGenerator {
 			} else {
 				selectedClasses.addAll(classes);
 			}
+
+			FileUtils.write(Paths.get(reportFile).toFile(), projectName + "\t" + classesFiles.size() + "\t"
+					+ classes.size() + "\t" + selectedClasses.size() + "\r\n", true);
 			if (singleClassInBench) {
 				int i = 0;
 				for (String selectedClass : selectedClasses) {
