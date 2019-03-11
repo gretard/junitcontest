@@ -1,7 +1,6 @@
 package sbst.pit.runner;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,10 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
+
+import sbst.pit.runner.metrics.MetricsCollector;
+import sbst.pit.runner.models.BaseRequest;
+import sbst.pit.runner.models.Bench;
 
 /**
  * Hello world!
@@ -22,63 +24,15 @@ import org.apache.commons.io.FileUtils;
  */
 public class App {
 
-	private static class CompileRequest {
-		public String reportsDir = "./reports";
-		public List<String> extra = new ArrayList<>();
-
-		public Bench bench;
-		public String sourceFile;
-		public String testBinDir = "./bin";
-		public String src = "testcases";
-
-		public String testName;
-		public String workingDir;
-
-		public String getReportsDir() {
-			return reportsDir + File.separator + testName;
-		}
-
-		public List<String> getAllCps() {
-			List<String> cps = new ArrayList<>();
-			cps.addAll(extra);
-			for (String x : bench.classpath) {
-				String t = x;
-				if (x.endsWith("dependency")) {
-					t = x + File.separator + "*";
-				}
-				cps.add(t);
-			}
-
-			return cps;
-		}
-
-		public List<String> getAllCpsForPit() {
-			List<String> cps = new ArrayList<>();
-			cps.addAll(extra);
-			for (String x : bench.classpath) {
-
-				String t = x;
-				if (x.endsWith("dependency")) {
-					t = x + File.separator + "*";
-				}
-				cps.add(t);
-			}
-			cps.add(testBinDir);
-			return cps;
-		}
-	}
-
 	public static void main(String[] args) throws Throwable {
+		System.out.println("Usage: force baseDir libsDir projectsConfigFile");
 		final boolean force = args.length > 0 ? Boolean.parseBoolean(args[0]) : false;
-		String baseDir = ".";
+		final String baseDir = args.length > 1 ? args[1] : ".";
 		String configFile = "/var/benchmarks/conf/benchmarks.list";
 
 		final List<String> libsDir = new ArrayList<>();
 		libsDir.add("/home/junit/libs/*");
 
-		if (args.length > 1) {
-			baseDir = args[1];
-		}
 		if (args.length > 2) {
 			libsDir.clear();
 			libsDir.addAll(Arrays.asList(args[2].split(",")));
@@ -88,16 +42,63 @@ public class App {
 			configFile = args[3];
 		}
 
-		final Map<String, Bench> benchmarks = Utils.getBenchmarks(configFile);
-		final File summaryOutFile = new File(baseDir, "summary.txt");
-		summaryOutFile.delete();
+		compileAndRunPit(configFile, force, baseDir, libsDir);
+		checkMutationsReports(Paths.get(baseDir, "summary.csv"), Paths.get(baseDir));
+		collectMetrics(baseDir);
+		collectBencharmkMetrics(baseDir, configFile);
+	}
 
-		Files.walk(Paths.get(baseDir), 4).forEach(e -> {
+	private static void collectBencharmkMetrics(final String baseDir, String configFile) throws ConfigurationException {
+		MetricsCollector collector = new MetricsCollector();
+
+		final Map<String, Bench> benchmarks = Utils.getBenchmarks(configFile);
+		Utils.deleteOld(Paths.get(baseDir, "metrics.csv"), false);
+		File metricsFile = Paths.get(baseDir, "metrics.csv").toFile();
+		benchmarks.forEach((k, v) -> {
+			collector.collectMetrics(v, metricsFile);
+		});
+
+	}
+
+	private static void collectMetrics(final String baseDir) throws IOException {
+		MetricsCollector collector = new MetricsCollector();
+		Utils.deleteOld(Paths.get(baseDir, "testMetrics.csv"), false);
+		File metricsFile = Paths.get(baseDir, "testMetrics.csv").toFile();
+		Files.walk(Paths.get(baseDir), 20)
+				.filter(x -> x.toFile().getAbsolutePath().contains("temp" + File.separator + "bin" + File.separator))
+				.forEach(path -> {
+					if (!path.toFile().getAbsolutePath().endsWith(".class")) {
+						return;
+					}
+
+					String filePath = path.toFile().getAbsolutePath().split("results")[1];
+					String classPath = Paths.get(path.toFile().getAbsolutePath().split("temp.bin")[0], "temp", "bin")
+							.toFile().getAbsolutePath();
+
+					String[] temp = filePath.replace(File.separatorChar, '.').split("_", 4);
+					String tool = temp[1];
+					String budget = temp[2].split("\\.")[0];
+					String benchmark = temp[2].split("\\.")[1];
+					String classzName = temp[3].split("temp\\.bin")[1];
+					classzName = classzName.substring(1, classzName.length() - 6);
+					BaseRequest request = new BaseRequest();
+					request.additionalInfoHeader = "benchmark\ttool\tbudget\t";
+					request.additionalInfo = benchmark + "\t" + tool + "\t" + budget + "\t";
+					request.classpath.add(classPath);
+					request.classes.add(classzName);
+					collector.collectMetrics(request, metricsFile);
+				});
+
+	}
+
+	private static void compileAndRunPit(String configFile, final boolean force, String baseDir,
+			final List<String> libsDir) throws IOException, ConfigurationException {
+		final Map<String, Bench> benchmarks = Utils.getBenchmarks(configFile);
+		Files.walk(Paths.get(baseDir), 8).forEach(e -> {
 			String benchName = e.getFileName().toString().split("_")[0];
 			if (!benchmarks.containsKey(benchName)) {
 				return;
 			}
-			final String configName = e.getParent().getFileName().toString();
 
 			final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
 			final Path compilationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "compilation.log");
@@ -106,23 +107,21 @@ public class App {
 			final Path generatedTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "testcases");
 			final Path compiledTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "bin");
 
-			if (!Files.exists(generatedTestsDirectory)) {
+			if (!generatedTestsDirectory.toFile().exists()) {
 				return;
 			}
 
-			List<CompileRequest> tests = new ArrayList<>();
-
-			if (!Files.exists(compilationsLog) || !Files.exists(mutatationsLog)
-					|| reportsDir.toFile().listFiles().length == 0 || force) {
-				tests.addAll(getTests(libsDir, benchmarks.get(benchName), base, reportsDir, generatedTestsDirectory,
-						compiledTestsDirectory));
+			if (compilationsLog.toFile().exists() && mutatationsLog.toFile().exists() && !force) {
+				return;
 			}
+			List<CompileRequest> tests = getTests(libsDir, benchmarks.get(benchName), base, reportsDir,
+					generatedTestsDirectory, compiledTestsDirectory);
 
 			if (!tests.isEmpty()) {
-				deleteOld(compiledTestsDirectory, true);
-				deleteOld(reportsDir, true);
-				deleteOld(mutatationsLog, false);
-				deleteOld(compilationsLog, false);
+				Utils.deleteOld(compiledTestsDirectory, true);
+				Utils.deleteOld(reportsDir, true);
+				Utils.deleteOld(mutatationsLog, false);
+				Utils.deleteOld(compilationsLog, false);
 				List<CompileRequest> compiledTests = new ArrayList<>();
 				log("Found: " + tests.size() + " tests at " + e.toString());
 				tests.forEach(t -> {
@@ -141,9 +140,8 @@ public class App {
 
 				});
 			}
-			checkMutationsReports(benchName, configName, summaryOutFile, reportsDir);
-		});
 
+		});
 	}
 
 	private static List<CompileRequest> getTests(final List<String> libsDir, Bench bench, final Path base,
@@ -182,17 +180,19 @@ public class App {
 		return tests;
 	}
 
-	private static void checkMutationsReports(String benchName, String config, File outFile, final Path reportsDir) {
-		if (!Files.exists(reportsDir)) {
-			return;
-		}
+	private static void checkMutationsReports(Path outPath, final Path reportsDir) {
+
 		try {
+			Utils.deleteOld(outPath, false);
+			File outFile = outPath.toFile();
 			log("Finding reports at " + reportsDir);
-			Files.walk(reportsDir, 4).filter(x -> x.getFileName().toString().contains("mutations.csv")).forEach(x -> {
+			Files.walk(reportsDir, 10).filter(x -> x.getFileName().toString().contains("mutations.csv")).forEach(x -> {
 
 				try {
-					final String tool = config.replace("results_", "").split("_")[0];
-					final String budget = config.replace("results_", "").split("_")[1];
+					Path u = Paths.get(x.toString().split("temp")[0]);
+					final String benchName = u.getFileName().toString().split("_")[0];
+					final String tool = u.getParent().toString().split("results_")[1].split("_")[0];
+					final String budget = u.getParent().toString().split("results_")[1].split("_")[1];
 					for (String line : FileUtils.readLines(x.toFile())) {
 						FileUtils.write(outFile, benchName + "," + tool + "," + budget + "," + line + "\r\n", true);
 					}
@@ -205,25 +205,6 @@ public class App {
 			e1.printStackTrace();
 		}
 
-	}
-
-	private static void deleteOld(Path path, boolean isDir) {
-
-		File f = path.toFile();
-		if (isDir) {
-			try {
-
-				FileUtils.deleteDirectory(f);
-				f.delete();
-				f.mkdirs();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-		} else {
-			f.delete();
-			f.getParentFile().mkdirs();
-		}
 	}
 
 	public static int runPit(CompileRequest request, Path log) {
@@ -249,7 +230,7 @@ public class App {
 			line.addArgument(request.getReportsDir());
 			line.addArgument("--outputFormats");
 			line.addArgument("csv,html,xml");
-			return launch(new File(request.workingDir), line, log);
+			return Utils.launch(new File(request.workingDir), line, log);
 		} catch (Throwable e) {
 			log("was not able to run pit:" + request.testName + " at " + request.workingDir);
 			return -1;
@@ -264,41 +245,15 @@ public class App {
 					.addArgument("-s").addArgument(request.src).addArgument("-cp")
 					.addArgument(String.join(File.pathSeparator, cps)).addArgument("-d").addArgument(request.testBinDir)
 					.addArgument(request.sourceFile);
-			return launch(new File(request.workingDir), line, log);
+			return Utils.launch(new File(request.workingDir), line, log);
 		} catch (Throwable e) {
 			log("was not able to compile file " + request.testName + " at " + request.workingDir);
 			return -1;
 		}
 	}
 
-	private static void log(String s) {
+	public static void log(String s) {
 		System.out.println(s);
 	}
 
-	private static int launch(File baseDir, CommandLine line, Path outFile) throws Throwable {
-		DefaultExecutor executor = new DefaultExecutor();
-		File f = new File(outFile.toFile().getAbsolutePath());
-		if (!f.exists()) {
-			f.createNewFile();
-		}
-
-		FileOutputStream outStream = new FileOutputStream(f, true);
-		FileOutputStream errStream = new FileOutputStream(f, true);
-		try {
-			FileUtils.write(f, "cd " + baseDir.getAbsolutePath() + "\r\n", true);
-			FileUtils.write(f, line.toString() + "\r\n", true);
-			PumpStreamHandler streamHandler = new PumpStreamHandler(outStream, errStream, null);
-			executor.setStreamHandler(streamHandler);
-			executor.setWorkingDirectory(baseDir);
-			int exitValue = executor.execute(line);
-			return exitValue;
-		} catch (Throwable e) {
-			e.printStackTrace();
-			log("An exception occurred during the execution of command " + line.toString());
-			return -1;
-		} finally {
-			outStream.close();
-			errStream.close();
-		}
-	}
 }

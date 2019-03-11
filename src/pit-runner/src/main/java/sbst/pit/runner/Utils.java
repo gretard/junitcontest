@@ -1,6 +1,9 @@
 package sbst.pit.runner;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,8 +11,60 @@ import java.util.Map;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.plist.PropertyListConfiguration;
 import org.apache.commons.configuration.tree.ConfigurationNode;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.FileUtils;
+
+import sbst.pit.runner.models.Bench;
 
 public class Utils {
+	public static void deleteOld(Path path, boolean isDir) {
+
+		File f = path.toFile();
+		if (isDir) {
+			try {
+
+				FileUtils.deleteDirectory(f);
+				f.delete();
+				f.mkdirs();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		} else {
+			f.delete();
+			f.getParentFile().mkdirs();
+		}
+	}
+
+	public static int launch(File baseDir, CommandLine line, Path outFile) throws Throwable {
+		DefaultExecutor executor = new DefaultExecutor();
+		File f = new File(outFile.toFile().getAbsolutePath());
+		if (!f.exists()) {
+			f.createNewFile();
+		}
+
+		FileOutputStream outStream = new FileOutputStream(f, true);
+		FileOutputStream errStream = new FileOutputStream(f, true);
+		try {
+			FileUtils.write(f, "cd " + baseDir.getAbsolutePath() + "\r\n", true);
+			FileUtils.write(f, line.toString() + "\r\n", true);
+			PumpStreamHandler streamHandler = new PumpStreamHandler(outStream, errStream, null);
+			executor.setStreamHandler(streamHandler);
+			executor.setWorkingDirectory(baseDir);
+			int exitValue = executor.execute(line);
+			return exitValue;
+		} catch (Throwable e) {
+			e.printStackTrace();
+			System.out.println("An exception occurred during the execution of command " + line.toString());
+			return -1;
+		} finally {
+			outStream.close();
+			errStream.close();
+		}
+	}
+
 	public static Map<String, Bench> getBenchmarks(String configFile) throws ConfigurationException {
 		PropertyListConfiguration benchmarkList = new PropertyListConfiguration();
 		benchmarkList.load(new File(configFile));
