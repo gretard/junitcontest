@@ -58,7 +58,7 @@ public class MetricsTransformer extends BodyTransformer {
 		metrics.nosm += body.getMethod().isStatic() ? 1 : 0;
 		metrics.nopm += body.getMethod().isPublic() ? 1 : 0;
 		metrics.instructions += instructions;
-
+		metrics.nom += 1;
 		data.put(key, metrics);
 	}
 
