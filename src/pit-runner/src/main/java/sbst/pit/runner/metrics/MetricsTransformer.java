@@ -9,6 +9,7 @@ import soot.BodyTransformer;
 import soot.PatchingChain;
 import soot.Unit;
 import soot.jimple.IfStmt;
+import soot.jimple.ReturnStmt;
 import soot.jimple.SwitchStmt;
 import soot.tagkit.Tag;
 
@@ -25,6 +26,7 @@ public class MetricsTransformer extends BodyTransformer {
 		final Iterator<Unit> stmtIt = units.snapshotIterator();
 		int complexity = 1;
 		int instructions = 0;
+		int returns = 0;
 		while (stmtIt.hasNext()) {
 			instructions++;
 			Unit current = stmtIt.next();
@@ -34,6 +36,10 @@ public class MetricsTransformer extends BodyTransformer {
 			}
 			if (current instanceof SwitchStmt) {
 				complexity += (((SwitchStmt) current).getTargets()).size();
+				continue;
+			}
+			if (current instanceof ReturnStmt) {
+				returns++;
 			}
 
 		}
@@ -47,6 +53,7 @@ public class MetricsTransformer extends BodyTransformer {
 		}
 		
 		metrics.complexity += complexity;
+		metrics.nor += returns;
 		metrics.noc += body.getMethod().isConstructor() ? 1 : 0;
 		metrics.nosm += body.getMethod().isStatic() ? 1 : 0;
 		metrics.nopm += body.getMethod().isPublic() ? 1 : 0;
