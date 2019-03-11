@@ -35,7 +35,6 @@ public class BenchmarksGenerator {
 		final int classesCount = args.length > 2 ? Integer.parseInt(args[2]) : 5;
 		final boolean singleClassInBench = args.length > 3 ? Boolean.parseBoolean(args[3]) : false;
 		final String reportFile = args.length > 4 ? args[4] : "./benchmark-stats.csv";
-		FileUtils.write(Paths.get(reportFile).toFile(), "project\ttotal\tclasses\tselected\r\n", false);
 		
 		final Path readDir = Paths.get(baseDir);
 
@@ -47,7 +46,8 @@ public class BenchmarksGenerator {
 				(path, attributes) -> attributes.isDirectory() && !path.toString().endsWith("_skip"))) {
 			pathsStream.sorted().forEach(p -> projects.add(p));
 		}
-
+		FileUtils.write(Paths.get(reportFile).toFile(), "project\ttotal\tclasses\tselected\r\n", false);
+		
 		final StringBuilder sb = new StringBuilder();
 		sb.append("{");
 		sb.append(System.lineSeparator());
@@ -87,6 +87,9 @@ public class BenchmarksGenerator {
 
 			FileUtils.write(Paths.get(reportFile).toFile(), projectName + "\t" + classesFiles.size() + "\t"
 					+ classes.size() + "\t" + selectedClasses.size() + "\r\n", true);
+			
+			log.info(() -> String.format("Adding  benchmark %s with %s classes for benchmarking", projectName,
+					selectedClasses.size()));
 			if (singleClassInBench) {
 				int i = 0;
 				for (String selectedClass : selectedClasses) {
@@ -107,8 +110,7 @@ public class BenchmarksGenerator {
 			sb.append(String.format(" classpath=(%s)%n", String.join(",", classpath)));
 			sb.append(String.format("}%n"));
 
-			log.info(() -> String.format("Added benchmark %s with %s classes for benchmarking", projectName,
-					selectedClasses.size()));
+		
 		}
 		sb.append("}");
 
