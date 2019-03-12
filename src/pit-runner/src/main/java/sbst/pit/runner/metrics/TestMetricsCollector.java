@@ -30,7 +30,8 @@ public class TestMetricsCollector implements IExecutor {
 					}
 
 					String filePath = path.toFile().getAbsolutePath().split("results")[1];
-					String classPath = Paths.get(path.toFile().getAbsolutePath().split("temp.bin")[0], "temp", "bin")
+					String p = path.toFile().getAbsolutePath().split("temp.bin")[0];
+					String classPath = Paths.get(p, "temp", "bin")
 							.toFile().getAbsolutePath();
 
 					String[] temp = filePath.replace(File.separatorChar, '.').split("_", 4);
@@ -41,7 +42,7 @@ public class TestMetricsCollector implements IExecutor {
 					classzName = classzName.substring(1, classzName.length() - 6);
 					BaseRequest baseRequest = new BaseRequest();
 					baseRequest.additionalInfoHeader = "benchmark\ttool\tbudget\t";
-					baseRequest.additionalInfo = benchmark + "\t" + tool + "\t" + budget + "\t";
+					baseRequest.additionalInfo = benchmark + "\t"+tool + "\t" + budget + "\t";
 					baseRequest.classpath.add(classPath);
 					baseRequest.classes.add(classzName);
 					collector.collectMetrics(baseRequest, metricsFile);

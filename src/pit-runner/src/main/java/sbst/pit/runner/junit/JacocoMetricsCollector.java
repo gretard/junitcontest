@@ -33,6 +33,7 @@ public class JacocoMetricsCollector implements IExecutor {
 								return;
 							}
 							Path u = Paths.get(x.toString().split("temp")[0]);
+							final String run = u.getFileName().toString();
 							final String benchName = u.getFileName().toString().split("_")[0];
 							final String tool = u.getParent().toString().split("results_")[1].split("_")[0];
 							final String budget = u.getParent().toString().split("results_")[1].split("_")[1];
@@ -43,7 +44,7 @@ public class JacocoMetricsCollector implements IExecutor {
 							}
 							for (int i = startLine; i < lines.size(); i++) {
 								final String line = lines.get(i);
-								FileUtils.write(outFile, benchName + "," + tool + "," + budget + "," + line + "\r\n",
+								FileUtils.write(outFile, benchName +","+run+ "," + tool + "," + budget + "," + line + "\r\n",
 										true);
 							}
 

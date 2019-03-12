@@ -30,11 +30,12 @@ public class PitMetricsCollector implements IExecutor {
 					.filter(x -> x.getFileName().toString().contains("mutations.csv")).forEach(x -> {
 						try {
 							Path u = Paths.get(x.toString().split("temp")[0]);
+							final String run = u.getFileName().toString();
 							final String benchName = u.getFileName().toString().split("_")[0];
 							final String tool = u.getParent().toString().split("results_")[1].split("_")[0];
 							final String budget = u.getParent().toString().split("results_")[1].split("_")[1];
 							for (String line : FileUtils.readLines(x.toFile())) {
-								FileUtils.write(outFile, benchName + "," + tool + "," + budget + "," + line + "\r\n",
+								FileUtils.write(outFile, benchName +","+run+ "," + tool+"," + budget + "," + line + "\r\n",
 										true);
 							}
 						} catch (Exception e) {
