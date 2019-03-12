@@ -33,12 +33,12 @@ public class JacocoMetricsReporter extends BaseRunner {
 			}
 
 			final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
-			final Path mutatationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "out-coverage.log");
+			final Path mutatationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "coverage-report.log");
 
-			final String inputDir = Paths.get(e.toFile().getAbsolutePath(), "temp", "cov-reports").toFile()
+			final String inputDir = Paths.get(e.toFile().getAbsolutePath(), "temp", "coverage-raw").toFile()
 					.getAbsolutePath();
 			
-			final String reportsDir = Paths.get(e.toFile().getAbsolutePath(), "temp", "out-cov-reports").toFile()
+			final String reportsDir = Paths.get(e.toFile().getAbsolutePath(), "temp", "coverage-reports").toFile()
 					.getAbsolutePath();
 			
 			if (mutatationsLog.toFile().exists() && !request.force) {

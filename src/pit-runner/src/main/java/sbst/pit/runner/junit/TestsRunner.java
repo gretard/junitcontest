@@ -33,9 +33,9 @@ public class TestsRunner extends BaseRunner {
 			}
 			
 			final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
-			final Path mutatationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "coverage.log");
+			final Path mutatationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "testrun.log");
 
-			final String reportsDir = Paths.get(e.toFile().getAbsolutePath(), "temp", "cov-reports").toFile()
+			final String reportsDir = Paths.get(e.toFile().getAbsolutePath(), "temp", "coverage-raw").toFile()
 					.getAbsolutePath();
 
 			if (mutatationsLog.toFile().exists() && !request.force) {

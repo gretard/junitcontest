@@ -21,6 +21,7 @@ public class CompilationRunner extends BaseRunner {
 	@Override
 	public void execute(Request request) throws Throwable {
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
+		//Path outPath = Paths.get(request.baseDir, "failed-compilations.log");
 		Files.walk(Paths.get(request.baseDir), 9999).forEach(e -> {
 
 			String[] temp = e.getFileName().toString().split("_");

@@ -54,9 +54,15 @@ public class App {
 			configFile = args[3];
 		}
 
-		BaseRunner[] runners = new BaseRunner[] { new CompilationRunner(), new PitRuner(), new TestsRunner(),
-				new JacocoMetricsReporter(), new PitMetricsCollector(), new TestMetricsCollector(),
-				new ProjectMetricsCollector(), new JacocoMetricsCollector() };
+		BaseRunner[] runners = new BaseRunner[] { 
+				new CompilationRunner(), 
+				new PitRuner(), 
+				new TestsRunner(),
+				new JacocoMetricsReporter(), 
+				new PitMetricsCollector(),
+				new TestMetricsCollector(),
+				new ProjectMetricsCollector(), 
+				new JacocoMetricsCollector() };
 		Request request = new Request();
 		request.baseDir = new File(baseDir).getAbsolutePath();
 		request.configFile = configFile;

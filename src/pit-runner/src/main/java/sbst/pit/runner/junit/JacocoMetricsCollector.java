@@ -29,6 +29,9 @@ public class JacocoMetricsCollector extends BaseRunner {
 			Files.walk(Paths.get(request.baseDir), 9999)
 					.filter(x -> x.getFileName().toString().contains("coverage.csv")).forEach(x -> {
 						try {
+							if (!x.toFile().getAbsolutePath().contains("coverage-reports")) {
+								return;
+							}
 							Path u = Paths.get(x.toString().split("temp")[0]);
 							final String benchName = u.getFileName().toString().split("_")[0];
 							final String tool = u.getParent().toString().split("results_")[1].split("_")[0];

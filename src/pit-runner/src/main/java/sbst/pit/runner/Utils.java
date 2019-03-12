@@ -54,6 +54,7 @@ public class Utils {
 			executor.setStreamHandler(streamHandler);
 			executor.setWorkingDirectory(baseDir);
 			int exitValue = executor.execute(line);
+
 			return exitValue;
 		} catch (Throwable e) {
 			e.printStackTrace();
