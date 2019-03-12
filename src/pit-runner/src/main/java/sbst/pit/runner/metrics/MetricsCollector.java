@@ -74,8 +74,8 @@ public class MetricsCollector {
 			try {
 				FileUtils.write(outFile,
 						request.additionalInfoHeader + "classz" + "\tcomplexity" + "\tinstructions" + "\tnumberOfTests"
-								+ "\tnumberOfConsturctors" + "\tnumberOfMethods" + "\tpublicMethods" + "\tstaticMethods\tnumberOfReturns"
-								+ "\r\n",
+								+ "\tnumberOfConsturctors" + "\tnumberOfMethods" + "\tpublicMethods" + "\tstaticMethods"
+								+ "\tnumberOfReturns" + "\toverridenMethods" + "\r\n",
 						true);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -85,8 +85,11 @@ public class MetricsCollector {
 		request.classes.forEach(k -> {
 			Metrics v = info.getOrDefault(k, new Metrics());
 			try {
-				FileUtils.write(outFile, request.additionalInfo + k + "\t" + v.complexity + "\t" + v.instructions + "\t"
-						+ v.numberOfTests + "\t" + v.noc + "\t" + v.nom + "\t" + v.nopm + "\t" + v.nosm + "\t" + v.nor+ "\r\n", true);
+				FileUtils.write(outFile,
+						request.additionalInfo + k + "\t" + v.complexity + "\t" + v.instructions + "\t"
+								+ v.numberOfTests + "\t" + v.noc + "\t" + v.nom + "\t" + v.nopm + "\t" + v.nosm + "\t"
+								+ v.nor + "\t" + v.noom + "\r\n",
+						true);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

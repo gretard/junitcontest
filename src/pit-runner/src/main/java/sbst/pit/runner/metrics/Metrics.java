@@ -11,5 +11,6 @@ public class Metrics {
 	public int nopm = 0;
 	public int nosm = 0;
 	public int nor = 0;
+	public int noom = 0;
 
 }
