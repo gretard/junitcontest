@@ -7,6 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 
@@ -14,17 +18,88 @@ import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.CompileRequest;
 import sbst.pit.runner.models.Request;
 
-public abstract class BaseRunner {
+public abstract class BaseRunner implements IExecutor {
+
 	public static void log(String s) {
 		System.out.println(s);
 	}
 
-	public abstract void execute(Request request) throws Throwable;
+	private String outDir;
 
-	public void logError(Request request, String data) {
+	public BaseRunner(String outDir) {
+		this.outDir = outDir;
+	}
+
+	public Path getOutputDir(Path current) {
+		return Paths.get(current.toFile().getAbsolutePath(), this.outDir);
+	}
+
+	public void execute(Request request) throws Throwable {
+
+		final ExecutorService service = Executors.newWorkStealingPool();
+		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
+
+		Files.walk(Paths.get(request.baseDir), 9999).forEach(e -> {
+
+			String[] temp = e.getFileName().toString().split("_");
+
+			if (temp.length < 1) {
+				return;
+			}
+
+			String benchName = temp[0];
+			if (!benchmarks.containsKey(benchName)) {
+				return;
+			}
+
+			final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
+			final Path logFile = Paths.get(e.toFile().getAbsolutePath(), "temp",
+					this.getClass().getSimpleName().toLowerCase() + ".log");
+
+			final Path outDirectory = getOutputDir(base);
+
+			if (logFile.toFile().exists() && !request.force) {
+				return;
+			}
+
+			List<CompileRequest> tests = getTests(request.libsDir, benchmarks.get(benchName), base);
+			log(this.getClass().getSimpleName() + " found " + tests.size());
+			Utils.deleteOld(outDirectory, true);
+			Utils.deleteOld(logFile, false);
+
+			tests.forEach(t -> {
+				service.submit(new Runnable() {
+
+					@Override
+					public void run() {
+						if (innerExecute(base, request, logFile, t) != 0) {
+							log(this.getClass().getSimpleName() + " ERROR " + t.testName + " "
+									+ base.toAbsolutePath().toString());
+							logError(request, t);
+						} else {
+							log(this.getClass().getSimpleName() + " OK " + t.testName + " "
+									+ base.toAbsolutePath().toString());
+						}
+
+					}
+				});
+
+			});
+
+		});
+
+		service.shutdown();
+		service.awaitTermination(2, TimeUnit.HOURS);
+		service.shutdownNow();
+
+	}
+
+	public abstract int innerExecute(Path current, Request request, Path logFile, CompileRequest item);
+
+	public void logError(Request request, CompileRequest data) {
 		try {
-			FileUtils.write(new File(request.baseDir, "errrors.txt"), this.getClass().getSimpleName() + "\t" + data+"\r\n",
-					true);
+			FileUtils.write(new File(request.baseDir, "errrors.txt"),
+					this.getClass().getSimpleName() + "\t" + data.sourceFile + "\t" + data.testName + "\r\n", true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,70 +1,25 @@
 package sbst.pit.runner.compilation;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.exec.CommandLine;
 
 import sbst.pit.runner.BaseRunner;
 import sbst.pit.runner.Utils;
-import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.CompileRequest;
 import sbst.pit.runner.models.Request;
 
 public class CompilationRunner extends BaseRunner {
 
-	@Override
-	public void execute(Request request) throws Throwable {
-		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
-		//Path outPath = Paths.get(request.baseDir, "failed-compilations.log");
-		Files.walk(Paths.get(request.baseDir), 9999).forEach(e -> {
-
-			String[] temp = e.getFileName().toString().split("_");
-			if (temp.length < 1) {
-				return;
-			}
-			String benchName = temp[0];
-			if (!benchmarks.containsKey(benchName)) {
-				return;
-			}
-
-			final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
-			final Path compilationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "compilation.log");
-			final Path compiledTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "bin");
-
-			if (compilationsLog.toFile().exists() && !request.force) {
-				return;
-			}
-			List<CompileRequest> tests = getTests(request.libsDir, benchmarks.get(benchName), base);
-			log("Found: " + tests.size() + " tests at " + e.toString());
-			if (!tests.isEmpty()) {
-				Utils.deleteOld(compiledTestsDirectory, true);
-				Utils.deleteOld(compilationsLog, false);
-				List<CompileRequest> compiledTests = new ArrayList<>();
-
-				tests.forEach(t -> {
-					if (compile(t, compilationsLog) == 0) {
-						if (!t.testName.contains("_scaffolding")) {
-							compiledTests.add(t);
-						}
-					} else {
-						logError(request, t.testName + " "+base.toFile().getAbsolutePath());
-					}
-				});
-
-				log("Compiled: " + compiledTests.size() + " tests");
-			}
-
-		});
-
+	public CompilationRunner() {
+		super("bin");
 	}
 
-	public static int compile(CompileRequest request, Path log) {
+	@Override
+	public int innerExecute(Path current, Request baseRequest, Path log, CompileRequest request) {
 		try {
 			List<String> cps = new ArrayList<>(request.getAllCps());
 			cps.add(request.testBinDir);
@@ -78,4 +33,5 @@ public class CompilationRunner extends BaseRunner {
 			return -1;
 		}
 	}
+
 }

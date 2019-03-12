@@ -8,11 +8,11 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 
-import sbst.pit.runner.BaseRunner;
+import sbst.pit.runner.IExecutor;
 import sbst.pit.runner.Utils;
 import sbst.pit.runner.models.Request;
 
-public class PitMetricsCollector extends BaseRunner {
+public class PitMetricsCollector implements IExecutor {
 
 	@Override
 	public void execute(Request request) throws Throwable {
@@ -26,7 +26,6 @@ public class PitMetricsCollector extends BaseRunner {
 			}
 			Utils.deleteOld(outPath, false);
 
-			log("Finding reports at " + request.baseDir);
 			Files.walk(Paths.get(request.baseDir), 9999)
 					.filter(x -> x.getFileName().toString().contains("mutations.csv")).forEach(x -> {
 						try {

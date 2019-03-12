@@ -38,7 +38,7 @@ public class App {
 	public static void main(String[] args) throws Throwable {
 		System.out.println("Usage: force baseDir libsDir projectsConfigFile");
 		final Modes mode = args.length > 0 ? Modes.valueOf(args[0].toUpperCase()) : Modes.DEFAULT;
-		
+
 		final String baseDir = args.length > 1 ? args[1] : ".";
 		String configFile = "/var/benchmarks/conf/benchmarks.list";
 
@@ -54,21 +54,16 @@ public class App {
 			configFile = args[3];
 		}
 
-		BaseRunner[] runners = new BaseRunner[] { 
-				new CompilationRunner(), 
-				new PitRuner(), 
-				new TestsRunner(),
-				new JacocoMetricsReporter(), 
-				new PitMetricsCollector(),
-				new TestMetricsCollector(),
-				new ProjectMetricsCollector(), 
-				new JacocoMetricsCollector() };
+		IExecutor[] runners = new IExecutor[] { new CompilationRunner(), new PitRuner(), new TestsRunner(),
+				new JacocoMetricsReporter(), new PitMetricsCollector(), new TestMetricsCollector(),
+				new ProjectMetricsCollector(), new JacocoMetricsCollector() };
+		
 		Request request = new Request();
 		request.baseDir = new File(baseDir).getAbsolutePath();
 		request.configFile = configFile;
 		request.force = mode == Modes.FORCE;
 
-		for (BaseRunner runner : runners) {
+		for (IExecutor runner : runners) {
 			runner.execute(request);
 		}
 

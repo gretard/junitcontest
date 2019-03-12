@@ -4,12 +4,12 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import sbst.pit.runner.BaseRunner;
+import sbst.pit.runner.IExecutor;
 import sbst.pit.runner.Utils;
 import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.Request;
 
-public class ProjectMetricsCollector extends BaseRunner {
+public class ProjectMetricsCollector implements IExecutor {
 	MetricsCollector collector = new MetricsCollector();
 
 	@Override

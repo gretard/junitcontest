@@ -9,11 +9,11 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import sbst.pit.runner.BaseRunner;
+import sbst.pit.runner.IExecutor;
 import sbst.pit.runner.Utils;
 import sbst.pit.runner.models.Request;
 
-public class JacocoMetricsCollector extends BaseRunner {
+public class JacocoMetricsCollector implements IExecutor {
 
 	@Override
 	public void execute(Request request) throws Throwable {
@@ -25,7 +25,7 @@ public class JacocoMetricsCollector extends BaseRunner {
 				return;
 			}
 			Utils.deleteOld(outPath, false);
-			log("Finding reports at " + request.baseDir);
+			
 			Files.walk(Paths.get(request.baseDir), 9999)
 					.filter(x -> x.getFileName().toString().contains("coverage.csv")).forEach(x -> {
 						try {

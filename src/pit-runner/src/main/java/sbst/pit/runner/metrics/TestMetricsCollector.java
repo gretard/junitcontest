@@ -5,11 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import sbst.pit.runner.BaseRunner;
+import sbst.pit.runner.IExecutor;
 import sbst.pit.runner.Utils;
 import sbst.pit.runner.models.BaseRequest;
 import sbst.pit.runner.models.Request;
 
-public class TestMetricsCollector extends BaseRunner {
+public class TestMetricsCollector implements IExecutor {
 	MetricsCollector collector = new MetricsCollector();
 
 	@Override
