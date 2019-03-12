@@ -40,12 +40,10 @@ public class CompileRequest {
 		List<String> cps = new ArrayList<>();
 		for (String x : bench.classpath) {
 			String t = x;
-			if (!new File(t).exists()) {
+			if (!new File(t).exists() || x.endsWith("dependency")) {
 				continue;
 			}
-			if (x.endsWith("dependency")) {
-				t = x + File.separator + "*";
-			}
+		
 			cps.add(t);
 		}
 

@@ -27,7 +27,7 @@ public class JacocoMetricsReporter extends BaseRunner {
 				.getAbsolutePath();
 		final Path inputFile = Paths.get(inputDir, item.testName + ".exec");
 
-		if (inputFile.toFile().exists()) {
+		if (!inputFile.toFile().exists()) {
 			System.out.println("Input file not found "+inputFile);
 			return -2;
 		}
@@ -45,8 +45,10 @@ public class JacocoMetricsReporter extends BaseRunner {
 					.addArgument("/home/junit/libs/jacococli.jar");
 			line.addArgument("report");
 			line.addArgument(inputFile.toFile().getAbsolutePath());
-			line.addArgument("--classfiles");
-			line.addArgument(String.join(",", request.getJacocoAllCps()));
+			for (String s : request.getJacocoAllCps()) {
+				line.addArgument("--classfiles");
+				line.addArgument(s);
+			}
 			line.addArgument("--sourcefiles");
 			line.addArgument(String.join(",", request.bench.src));
 			line.addArgument("--html");

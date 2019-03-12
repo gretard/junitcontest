@@ -35,7 +35,7 @@ public abstract class BaseRunner implements IExecutor {
 	}
 
 	public void execute(Request request) throws Throwable {
-
+		final String name = this.getClass().getSimpleName();
 		final ExecutorService service = Executors.newWorkStealingPool();
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
 
@@ -57,28 +57,34 @@ public abstract class BaseRunner implements IExecutor {
 					this.getClass().getSimpleName().toLowerCase() + ".log");
 
 			final Path outDirectory = getOutputDir(base);
-
-			if (logFile.toFile().exists() && !request.force) {
+			
+			if (logFile.toFile().exists() && 
+					!request.force && 
+					outDirectory.toFile().exists() 
+					&& outDirectory.toFile().listFiles().length > 0) {
 				return;
 			}
 
 			List<CompileRequest> tests = getTests(request.libsDir, benchmarks.get(benchName), base);
-			log(this.getClass().getSimpleName() + " found " + tests.size());
+			if (tests.size() == 0) {
+				return;
+			}
+			log(name + " found " + tests.size()+" to work on");
 			Utils.deleteOld(outDirectory, true);
 			Utils.deleteOld(logFile, false);
-
+		
 			tests.forEach(t -> {
 				service.submit(new Runnable() {
 
 					@Override
 					public void run() {
 						if (innerExecute(base, request, logFile, t) != 0) {
-							log(this.getClass().getSimpleName() + " ERROR " + t.testName + " "
-									+ base.toAbsolutePath().toString());
-							logError(request, t);
+							log(name + " ERROR " + t.testName + " "
+									+ base.toFile().getAbsolutePath());
+							logError(base, request, t);
 						} else {
-							log(this.getClass().getSimpleName() + " OK " + t.testName + " "
-									+ base.toAbsolutePath().toString());
+							log(name + " OK " + t.testName + " "
+									+ base.toFile().getAbsolutePath());
 						}
 
 					}
@@ -89,6 +95,8 @@ public abstract class BaseRunner implements IExecutor {
 		});
 
 		service.shutdown();
+		
+		log(name + " waiting for finish...");
 		service.awaitTermination(2, TimeUnit.HOURS);
 		service.shutdownNow();
 
@@ -96,10 +104,10 @@ public abstract class BaseRunner implements IExecutor {
 
 	public abstract int innerExecute(Path current, Request request, Path logFile, CompileRequest item);
 
-	public void logError(Request request, CompileRequest data) {
+	public void logError(Path current, Request request, CompileRequest data) {
 		try {
 			FileUtils.write(new File(request.baseDir, "errrors.txt"),
-					this.getClass().getSimpleName() + "\t" + data.sourceFile + "\t" + data.testName + "\r\n", true);
+					this.getClass().getSimpleName() + "\t" + current+"\t"+data.sourceFile + "\t" + data.testName + "\r\n", true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -110,7 +118,7 @@ public abstract class BaseRunner implements IExecutor {
 		final Path generatedTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "testcases");
 		final Path compiledTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "bin");
 		try {
-			log("Searching for tests at " + generatedTestsDirectory);
+		
 			Files.walk(generatedTestsDirectory).filter(x -> x.toFile().getAbsolutePath().contains(".java"))
 					.forEach(t -> {
 
