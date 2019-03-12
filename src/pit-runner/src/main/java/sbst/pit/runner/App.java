@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import sbst.pit.runner.compilation.CompilationRunner;
+import sbst.pit.runner.junit.JacocoMetricsCollector;
 import sbst.pit.runner.junit.JacocoMetricsReporter;
 import sbst.pit.runner.junit.TestsRunner;
 import sbst.pit.runner.metrics.ProjectMetricsCollector;
@@ -55,7 +56,7 @@ public class App {
 
 		BaseRunner[] runners = new BaseRunner[] { new CompilationRunner(), new PitRuner(), new TestsRunner(),
 				new JacocoMetricsReporter(), new PitMetricsCollector(), new TestMetricsCollector(),
-				new ProjectMetricsCollector() };
+				new ProjectMetricsCollector(), new JacocoMetricsCollector() };
 		Request request = new Request();
 		request.baseDir = new File(baseDir).getAbsolutePath();
 		request.configFile = configFile;
