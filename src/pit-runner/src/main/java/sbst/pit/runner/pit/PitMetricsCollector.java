@@ -22,7 +22,7 @@ public class PitMetricsCollector extends BaseRunner {
 			Utils.deleteOld(outPath, false);
 			File outFile = outPath.toFile();
 			log("Finding reports at " + request.baseDir);
-			Files.walk(Paths.get(request.baseDir), 999)
+			Files.walk(Paths.get(request.baseDir), 9999)
 					.filter(x -> x.getFileName().toString().contains("mutations.csv")).forEach(x -> {
 						try {
 							Path u = Paths.get(x.toString().split("temp")[0]);

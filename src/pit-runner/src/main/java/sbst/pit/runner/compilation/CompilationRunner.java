@@ -16,13 +16,18 @@ import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.CompileRequest;
 import sbst.pit.runner.models.Request;
 
-public class CompilationRunner extends BaseRunner{
+public class CompilationRunner extends BaseRunner {
 
 	@Override
 	public void execute(Request request) throws Throwable {
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
-		Files.walk(Paths.get(request.baseDir), 8).forEach(e -> {
-			String benchName = e.getFileName().toString().split("_")[0];
+		Files.walk(Paths.get(request.baseDir), 9999).forEach(e -> {
+
+			String[] temp = e.getFileName().toString().split("_");
+			if (temp.length < 1) {
+				return;
+			}
+			String benchName = temp[0];
 			if (!benchmarks.containsKey(benchName)) {
 				return;
 			}
@@ -35,12 +40,12 @@ public class CompilationRunner extends BaseRunner{
 				return;
 			}
 			List<CompileRequest> tests = getTests(request.libsDir, benchmarks.get(benchName), base);
-
+			log("Found: " + tests.size() + " tests at " + e.toString());
 			if (!tests.isEmpty()) {
 				Utils.deleteOld(compiledTestsDirectory, true);
 				Utils.deleteOld(compilationsLog, false);
 				List<CompileRequest> compiledTests = new ArrayList<>();
-				log("Found: " + tests.size() + " tests at " + e.toString());
+
 				tests.forEach(t -> {
 					if (compile(t, compilationsLog) == 0) {
 						if (!t.testName.contains("_scaffolding")) {
@@ -53,8 +58,9 @@ public class CompilationRunner extends BaseRunner{
 			}
 
 		});
-		
+
 	}
+
 	public static int compile(CompileRequest request, Path log) {
 		try {
 			List<String> cps = new ArrayList<>(request.getAllCps());

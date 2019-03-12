@@ -21,7 +21,7 @@ public class TestMetricsCollector extends BaseRunner {
 			return;
 		}
 		Utils.deleteOld(Paths.get(baseDir, "testMetrics.csv"), false);
-		Files.walk(Paths.get(baseDir), 20)
+		Files.walk(Paths.get(baseDir), 9999)
 				.filter(x -> x.toFile().getAbsolutePath().contains("temp" + File.separator + "bin" + File.separator))
 				.forEach(path -> {
 					if (!path.toFile().getAbsolutePath().endsWith(".class")) {

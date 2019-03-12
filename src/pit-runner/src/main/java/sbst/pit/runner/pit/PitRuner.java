@@ -21,7 +21,7 @@ public class PitRuner extends BaseRunner {
 	@Override
 	public void execute(Request request) throws Throwable {
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
-		Files.walk(Paths.get(request.baseDir), 8).forEach(e -> {
+		Files.walk(Paths.get(request.baseDir), 9999).forEach(e -> {
 			String benchName = e.getFileName().toString().split("_")[0];
 			if (!benchmarks.containsKey(benchName)) {
 				return;

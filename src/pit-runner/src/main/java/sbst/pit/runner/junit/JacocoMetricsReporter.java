@@ -22,7 +22,7 @@ public class JacocoMetricsReporter extends BaseRunner {
 		String baseDir = request.baseDir;
 
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(configFile);
-		Files.walk(Paths.get(baseDir), 8).forEach(e -> {
+		Files.walk(Paths.get(baseDir), 9999).forEach(e -> {
 			String benchName = e.getFileName().toString().split("_")[0];
 			if (!benchmarks.containsKey(benchName)) {
 				return;

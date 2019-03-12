@@ -1,5 +1,6 @@
 package sbst.pit.runner;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +37,7 @@ public class App {
 	public static void main(String[] args) throws Throwable {
 		System.out.println("Usage: force baseDir libsDir projectsConfigFile");
 		final Modes mode = args.length > 0 ? Modes.valueOf(args[0].toUpperCase()) : Modes.DEFAULT;
-		System.out.println(mode);
+		
 		final String baseDir = args.length > 1 ? args[1] : ".";
 		String configFile = "/var/benchmarks/conf/benchmarks.list";
 
@@ -56,9 +57,10 @@ public class App {
 				new JacocoMetricsReporter(), new PitMetricsCollector(), new TestMetricsCollector(),
 				new ProjectMetricsCollector() };
 		Request request = new Request();
-		request.baseDir = baseDir;
+		request.baseDir = new File(baseDir).getAbsolutePath();
 		request.configFile = configFile;
 		request.force = mode == Modes.FORCE;
+
 		for (BaseRunner runner : runners) {
 			runner.execute(request);
 		}
