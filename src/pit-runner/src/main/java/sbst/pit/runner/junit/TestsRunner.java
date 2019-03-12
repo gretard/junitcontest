@@ -23,11 +23,15 @@ public class TestsRunner extends BaseRunner {
 
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(configFile);
 		Files.walk(Paths.get(baseDir), 9999).forEach(e -> {
-			String benchName = e.getFileName().toString().split("_")[0];
+			String[] temp = e.getFileName().toString().split("_");
+			if (temp.length < 1) {
+				return;
+			}
+			String benchName = temp[0];
 			if (!benchmarks.containsKey(benchName)) {
 				return;
 			}
-
+			
 			final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
 			final Path mutatationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "coverage.log");
 
