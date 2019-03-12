@@ -31,7 +31,7 @@ public class PitRuner extends BaseRunner {
 				return;
 			}
 			final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
-			final Path mutatationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "mutations.log");
+			final Path mutatationsLog = Paths.get(e.toFile().getAbsolutePath(), "temp", "pit-mutations.log");
 
 			final String reportsDir = Paths.get(e.toFile().getAbsolutePath(), "temp", "pit-reports").toFile()
 					.getAbsolutePath();
@@ -58,6 +58,9 @@ public class PitRuner extends BaseRunner {
 				compiledTests.forEach(t -> {
 					if (runPit(t, mutatationsLog, reportsDir) == 0) {
 						log("Run pit ok on: " + t.testName);
+					} else {
+						logError(request, t.testName + " "+base.toFile().getAbsolutePath());
+
 					}
 
 				});

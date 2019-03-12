@@ -64,6 +64,8 @@ public class JacocoMetricsReporter extends BaseRunner {
 					String inputFile = inputDir + "/" + t.testName + ".exec";
 					if (runJacoco(t, mutatationsLog, inputFile, reportsDir+File.separatorChar+t.testName) == 0) {
 						log("Run  jacoco on: " + t.testName);
+					} else {
+						logError(request, t.testName + " "+base.toFile().getAbsolutePath());
 					}
 
 				});

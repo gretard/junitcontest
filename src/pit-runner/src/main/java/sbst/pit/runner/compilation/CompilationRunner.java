@@ -52,6 +52,8 @@ public class CompilationRunner extends BaseRunner {
 						if (!t.testName.contains("_scaffolding")) {
 							compiledTests.add(t);
 						}
+					} else {
+						logError(request, t.testName + " "+base.toFile().getAbsolutePath());
 					}
 				});
 

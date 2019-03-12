@@ -60,6 +60,8 @@ public class TestsRunner extends BaseRunner {
 				compiledTests.forEach(t -> {
 					if (runJacoco(t, mutatationsLog, reportsDir + "/" + t.testName + ".exec") == 0) {
 						log("Run tests on: " + t.testName);
+					} else {
+						logError(request, t.testName + " "+base.toFile().getAbsolutePath());
 					}
 
 				});
