@@ -115,6 +115,7 @@ public abstract class BaseRunner implements IExecutor {
 
 	public static List<CompileRequest> getTests(final List<String> libsDir, Bench bench, final Path base) {
 		List<CompileRequest> tests = new ArrayList<>();
+		List<CompileRequest> other = new ArrayList<>();
 		final Path generatedTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "testcases");
 		final Path compiledTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "bin");
 		try {
@@ -136,7 +137,7 @@ public abstract class BaseRunner implements IExecutor {
 						r.testBinDir = compiledTestsDirectory.toFile().getAbsolutePath();
 						r.extra.addAll(libsDir);
 						if (testName.toLowerCase().contains("_scaffolding")) {
-							tests.add(0, r);
+							other.add(0, r);
 						} else {
 							tests.add(r);
 						}
@@ -145,7 +146,10 @@ public abstract class BaseRunner implements IExecutor {
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 		}
-		return tests;
+		List<CompileRequest> main = new ArrayList<>();
+		main.addAll(other);
+		main.addAll(tests);
+		return main;
 	}
 
 }
