@@ -72,27 +72,27 @@ public abstract class BaseRunner implements IExecutor {
 			log(name + " found " + tests.size()+" to work on");
 			Utils.deleteOld(outDirectory, true);
 			Utils.deleteOld(logFile, false);
-		
-			tests.forEach(t -> {
+					
 				service.submit(new Runnable() {
-
+				
 					@Override
 					public void run() {
-						if (innerExecute(base, request, logFile, t) != 0) {
-							log(name + " ERROR " + t.testName + " "
-									+ base.toFile().getAbsolutePath());
-							logError(base, request, t);
-						} else {
-							log(name + " OK " + t.testName + " "
-									+ base.toFile().getAbsolutePath());
-						}
-
+						tests.forEach(t -> {
+							if (innerExecute(base, request, logFile, t) != 0) {
+								log(name + " ERROR " + t.testName + " "
+										+ base.toFile().getAbsolutePath());
+								logError(base, request, t);
+							} else {
+								log(name + " OK " + t.testName + " "
+										+ base.toFile().getAbsolutePath());
+							}
+						});
 					}
 				});
 
 			});
 
-		});
+
 
 		service.shutdown();
 		
