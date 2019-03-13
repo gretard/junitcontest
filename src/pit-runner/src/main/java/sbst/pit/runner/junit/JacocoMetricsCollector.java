@@ -25,7 +25,7 @@ public class JacocoMetricsCollector implements IExecutor {
 				return;
 			}
 			Utils.deleteOld(outPath, false);
-			
+
 			Files.walk(Paths.get(request.baseDir), 9999)
 					.filter(x -> x.getFileName().toString().contains("coverage.csv")).forEach(x -> {
 						try {
@@ -44,8 +44,12 @@ public class JacocoMetricsCollector implements IExecutor {
 							}
 							for (int i = startLine; i < lines.size(); i++) {
 								final String line = lines.get(i);
-								FileUtils.write(outFile, benchName +","+run+ "," + tool + "," + budget + "," + line + "\r\n",
-										true);
+								if (i == 0) {
+									FileUtils.write(outFile, "benchmark,run,tool,budget," + line + "\r\n", true);
+									continue;
+								}
+								FileUtils.write(outFile,
+										benchName + "," + run + "," + tool + "," + budget + "," + line + "\r\n", true);
 							}
 
 						} catch (Exception e) {
