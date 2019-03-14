@@ -21,7 +21,7 @@ import sbst.pit.runner.pit.PitRuner;
  */
 public class App {
 	public static enum Modes {
-		METRICS(1), MUTATIONS(2), FORCE(8), DEFAULT(4), ALL(16);
+		COMPILE(1), MUTATIONS(2), COVERAGE(4), METRICS(8), DEFAULT(0), FORCE(15);
 
 		private final int mode;
 
@@ -33,12 +33,16 @@ public class App {
 			this.mode = mode;
 
 		}
+
+		public boolean isSet(int mode) {
+			return (this.mode & mode) == this.mode;
+		}
 	}
 
 	public static void main(String[] args) throws Throwable {
 		System.out.println("Usage: force baseDir libsDir projectsConfigFile");
-		final Modes mode = args.length > 0 ? Modes.valueOf(args[0].toUpperCase()) : Modes.DEFAULT;
-
+		final int mode = args.length > 0 ? Integer.parseInt(args[0]) : Modes.DEFAULT.getMode();
+		System.out.println("Args were: " + Arrays.toString(args));
 		final String baseDir = args.length > 1 ? args[1] : ".";
 		String configFile = "/var/benchmarks/conf/benchmarks.list";
 
@@ -63,8 +67,9 @@ public class App {
 		Request request = new Request();
 		request.baseDir = new File(baseDir).getAbsolutePath();
 		request.configFile = configFile;
-		request.force = mode == Modes.FORCE;
+		request.mode = mode;
 		request.libsDir.addAll(libsDir);
+
 		for (IExecutor runner : runners) {
 			runner.execute(request);
 		}

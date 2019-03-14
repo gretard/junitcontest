@@ -6,6 +6,7 @@ import java.util.Map;
 
 import sbst.pit.runner.IExecutor;
 import sbst.pit.runner.Utils;
+import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.Request;
 
@@ -17,10 +18,10 @@ public class ProjectMetricsCollector implements IExecutor {
 		String configFile = request.configFile;
 		File metricsFile = Paths.get(request.baseDir, "metrics.csv").toFile();
 
-		if (metricsFile.exists() && !request.force) {
+		if (metricsFile.exists() && !Modes.METRICS.isSet(request.mode)) {
 			return;
 		}
-
+		
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(configFile);
 		Utils.deleteOld(Paths.get(request.baseDir, "metrics.csv"), false);
 		benchmarks.forEach((k, v) -> {

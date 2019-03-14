@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 
 import sbst.pit.runner.IExecutor;
 import sbst.pit.runner.Utils;
+import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.models.Request;
 
 public class JacocoMetricsCollector implements IExecutor {
@@ -21,9 +22,11 @@ public class JacocoMetricsCollector implements IExecutor {
 		try {
 			Path outPath = Paths.get(request.baseDir, "jacoco.csv");
 			File outFile = outPath.toFile();
-			if (outFile.exists() && !request.force) {
+
+			if (outFile.exists() && !Modes.METRICS.isSet(request.mode)) {
 				return;
 			}
+			
 			Utils.deleteOld(outPath, false);
 
 			Files.walk(Paths.get(request.baseDir), 9999)

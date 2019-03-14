@@ -11,12 +11,13 @@ import org.apache.commons.exec.CommandLine;
 import sbst.pit.runner.BaseRunner;
 import sbst.pit.runner.RunnerRequest;
 import sbst.pit.runner.Utils;
+import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.models.CompileRequest;
 import sbst.pit.runner.models.Request;
 
 public class JacocoMetricsReporter extends BaseRunner {
 	public JacocoMetricsReporter() {
-		super("coverage-reports");
+		super("coverage-reports", Modes.COVERAGE);
 	}
 	@Override
 	public int innerExecute(RunnerRequest r) {
@@ -46,7 +47,7 @@ public class JacocoMetricsReporter extends BaseRunner {
 
 	public static int runJacoco(RunnerRequest request, Path inputFile) {
 		try {
-			//new File(reportsDir).mkdirs();
+		
 			CommandLine line = new CommandLine("java").addArgument("-jar")
 					.addArgument("/home/junit/libs/jacococli.jar");
 			line.addArgument("report");
@@ -63,6 +64,7 @@ public class JacocoMetricsReporter extends BaseRunner {
 			line.addArgument(request.outDirectory.toFile().getAbsolutePath() + File.separator + "coverage.csv");
 			return Utils.launch(request.workingPath.toFile(), line, request.logFile);
 		} catch (Throwable e) {
+			e.printStackTrace();
 			log("was not able instrument:" + request.workingPath);
 			return -1;
 		}

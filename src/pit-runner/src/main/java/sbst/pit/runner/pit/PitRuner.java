@@ -9,12 +9,13 @@ import org.apache.commons.exec.CommandLine;
 import sbst.pit.runner.BaseRunner;
 import sbst.pit.runner.RunnerRequest;
 import sbst.pit.runner.Utils;
+import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.models.CompileRequest;
 
 public class PitRuner extends BaseRunner {
 
 	public PitRuner() {
-		super("pit-reports");
+		super("pit-reports", Modes.MUTATIONS);
 	}
 
 	@Override

@@ -44,7 +44,7 @@ public class Utils {
 		if (!f.exists()) {
 			f.createNewFile();
 		}
-		System.out.println("Starting running "+line.toString());
+	
 		FileOutputStream outStream = new FileOutputStream(f, true);
 		FileOutputStream errStream = new FileOutputStream(f, true);
 		try {
@@ -57,7 +57,6 @@ public class Utils {
 
 			return exitValue;
 		} catch (Throwable e) {
-			e.printStackTrace();
 			System.out.println("An exception occurred during the execution of command " + line.toString());
 			return -1;
 		} finally {

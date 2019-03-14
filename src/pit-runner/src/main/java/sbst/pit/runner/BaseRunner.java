@@ -1,6 +1,7 @@
 package sbst.pit.runner;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,11 +15,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 
+import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.CompileRequest;
 import sbst.pit.runner.models.Request;
 
 public abstract class BaseRunner implements IExecutor {
+
+	private Modes mode;
 
 	public static void log(String s) {
 		System.out.println(s);
@@ -26,8 +30,9 @@ public abstract class BaseRunner implements IExecutor {
 
 	private String outDir;
 
-	public BaseRunner(String outDir) {
+	public BaseRunner(String outDir, Modes mode) {
 		this.outDir = outDir;
+		this.mode = mode;
 	}
 
 	public Path getOutputDir(Path current) {
@@ -36,76 +41,85 @@ public abstract class BaseRunner implements IExecutor {
 
 	public void execute(Request request) throws Throwable {
 		final String name = this.getClass().getSimpleName();
-		final ExecutorService service = Executors.newWorkStealingPool();
+		final ExecutorService service = Executors.newWorkStealingPool(8);
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
-
+		//final FileWriter writer = new FileWriter(Paths.get(request.baseDir, "ok.txt").toFile());
 		Files.walk(Paths.get(request.baseDir), 9999).forEach(e -> {
 
-			String[] temp = e.getFileName().toString().split("_");
+			try {
+				String[] temp = e.getFileName().toString().split("_");
 
-			if (temp.length < 1) {
-				return;
-			}
-
-			String benchName = temp[0];
-			if (!benchmarks.containsKey(benchName)) {
-				return;
-			}
-
-			final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
-			final Path logFile = Paths.get(e.toFile().getAbsolutePath(), "temp",
-					this.getClass().getSimpleName().toLowerCase() + ".log");
-
-			final Path outDirectory = getOutputDir(base);
-
-			if (logFile.toFile().exists() && !request.force && outDirectory.toFile().exists()
-					&& outDirectory.toFile().listFiles().length > 0) {
-				return;
-			}
-
-			RunnerRequest r = getTests(request.libsDir, benchmarks.get(benchName), base);
-			if (r.items.size() == 0) {
-				return;
-			}
-			log(name + " found " + r.items.size() + " to work on");
-			Utils.deleteOld(outDirectory, true);
-			Utils.deleteOld(logFile, false);
-
-			service.submit(new Runnable() {
-
-				
-				@Override
-				public void run() {
-					
-					r.logFile = logFile;
-					r.workingPath = base;
-					r.outDirectory = outDirectory;
-					if (innerExecute(r) != 0) {
-						log(name + " ERROR " + base.toFile().getAbsolutePath());
-						logError(base, request);
-					} else {
-						log(name + " OK " + base.toFile().getAbsolutePath());
-					}
+				if (temp.length < 1) {
+					return;
 				}
-			});
+
+				String benchName = temp[0];
+				if (!benchmarks.containsKey(benchName)) {
+					return;
+				}
+
+				final Path base = Paths.get(e.toFile().getAbsolutePath(), "temp");
+				final Path logFile = Paths.get(e.toFile().getAbsolutePath(), "temp",
+						this.getClass().getSimpleName().toLowerCase() + ".log");
+
+				final Path outDirectory = getOutputDir(base);
+
+				boolean forceRun = this.mode.isSet(request.mode);
+
+				if (!forceRun && logFile.toFile().exists() && outDirectory.toFile().exists()
+						&& outDirectory.toFile().listFiles().length > 0) {
+					return;
+				}
+
+				RunnerRequest r = getTests(request.libsDir, benchmarks.get(benchName), base);
+				if (r.items.size() == 0) {
+					return;
+				}
+
+				Utils.deleteOld(outDirectory, true);
+				Utils.deleteOld(logFile, false);
+
+				service.submit(new Runnable() {
+
+					@Override
+					public void run() {
+
+						r.logFile = logFile;
+						r.workingPath = base;
+						r.outDirectory = outDirectory;
+						if (innerExecute(r) != 0) {
+							log(name + " ERROR " + base.toFile().getAbsolutePath());
+							logError(base, request);
+						} else {
+							/*
+							 * try { writer.write(name + " OK " + base.toFile().getAbsolutePath()+"\r\n"); }
+							 * catch (IOException e) { // TODO Auto-generated catch block
+							 * e.printStackTrace(); }
+							 */
+						}
+					}
+				});
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 
 		});
 
 		service.shutdown();
-
+	
 		log(name + " waiting for finish...");
 		service.awaitTermination(2, TimeUnit.HOURS);
 		service.shutdownNow();
-
+	//writer.close();
 	}
 
 	public abstract int innerExecute(RunnerRequest request);
 
 	public void logError(Path current, Request request) {
 		try {
-			FileUtils.write(new File(request.baseDir, "errrors.txt"), this.getClass().getSimpleName() + "\t" +
-		current.toFile().getAbsolutePath()+
-					"\r\n", true);
+			String line = this.getClass().getSimpleName() + "\t" + current.toFile().getAbsolutePath();
+			FileUtils.write(new File(request.baseDir, "errrors.txt"),
+					 line+ "\r\n", true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -155,7 +169,7 @@ public abstract class BaseRunner implements IExecutor {
 		main.addAll(other);
 		main.addAll(tests);
 		main.addAll(post);
-		
+
 		RunnerRequest r = new RunnerRequest();
 		r.bench = bench;
 		r.paths.addAll(libsDir);

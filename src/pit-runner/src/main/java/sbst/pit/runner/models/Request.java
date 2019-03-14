@@ -3,9 +3,11 @@ package sbst.pit.runner.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import sbst.pit.runner.App.Modes;
+
 public class Request {
 	public String configFile = "/var/benchmarks/conf/benchmarks.list";
-	public boolean force = false;
+	public int mode = Modes.DEFAULT.getMode();
 	public String baseDir = ".";
 	public final List<String> libsDir = new ArrayList<>();
 

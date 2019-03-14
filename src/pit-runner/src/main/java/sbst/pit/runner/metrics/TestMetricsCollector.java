@@ -4,7 +4,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import sbst.pit.runner.BaseRunner;
+import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.IExecutor;
 import sbst.pit.runner.Utils;
 import sbst.pit.runner.models.BaseRequest;
@@ -18,9 +18,10 @@ public class TestMetricsCollector implements IExecutor {
 		String baseDir = request.baseDir;
 		File metricsFile = Paths.get(baseDir, "testMetrics.csv").toFile();
 
-		if (metricsFile.exists() && !request.force) {
+		if (metricsFile.exists() && !Modes.METRICS.isSet(request.mode)) {
 			return;
 		}
+	
 		Utils.deleteOld(Paths.get(baseDir, "testMetrics.csv"), false);
 		Files.walk(Paths.get(baseDir), 9999)
 				.filter(x -> x.toFile().getAbsolutePath().contains("temp" + File.separator + "bin" + File.separator))
@@ -31,8 +32,7 @@ public class TestMetricsCollector implements IExecutor {
 
 					String filePath = path.toFile().getAbsolutePath().split("results")[1];
 					String p = path.toFile().getAbsolutePath().split("temp.bin")[0];
-					String classPath = Paths.get(p, "temp", "bin")
-							.toFile().getAbsolutePath();
+					String classPath = Paths.get(p, "temp", "bin").toFile().getAbsolutePath();
 
 					String[] temp = filePath.replace(File.separatorChar, '.').split("_", 4);
 					String tool = temp[1];
@@ -42,7 +42,7 @@ public class TestMetricsCollector implements IExecutor {
 					classzName = classzName.substring(1, classzName.length() - 6);
 					BaseRequest baseRequest = new BaseRequest();
 					baseRequest.additionalInfoHeader = "benchmark\ttool\tbudget\t";
-					baseRequest.additionalInfo = benchmark + "\t"+tool + "\t" + budget + "\t";
+					baseRequest.additionalInfo = benchmark + "\t" + tool + "\t" + budget + "\t";
 					baseRequest.classpath.add(classPath);
 					baseRequest.classes.add(classzName);
 					collector.collectMetrics(baseRequest, metricsFile);

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 
+import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.BaseRunner;
 import sbst.pit.runner.RunnerRequest;
 import sbst.pit.runner.Utils;
@@ -16,7 +17,7 @@ import sbst.pit.runner.models.CompileRequest;
 public class TestsRunner extends BaseRunner {
 
 	public TestsRunner() {
-		super("coverage-raw");
+		super("coverage-raw", Modes.COVERAGE);
 	}
 
 	@Override
