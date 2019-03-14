@@ -44,7 +44,7 @@ public class Utils {
 		if (!f.exists()) {
 			f.createNewFile();
 		}
-
+		System.out.println("Starting running "+line.toString());
 		FileOutputStream outStream = new FileOutputStream(f, true);
 		FileOutputStream errStream = new FileOutputStream(f, true);
 		try {

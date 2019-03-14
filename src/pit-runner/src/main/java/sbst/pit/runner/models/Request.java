@@ -9,8 +9,4 @@ public class Request {
 	public String baseDir = ".";
 	public final List<String> libsDir = new ArrayList<>();
 
-	public Request() {
-		libsDir.add("/home/junit/libs/*");
-	}
-
 }

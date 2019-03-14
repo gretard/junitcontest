@@ -3,42 +3,55 @@ package sbst.pit.runner.junit;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 
 import sbst.pit.runner.BaseRunner;
+import sbst.pit.runner.RunnerRequest;
 import sbst.pit.runner.Utils;
 import sbst.pit.runner.models.CompileRequest;
-import sbst.pit.runner.models.Request;
 
 public class TestsRunner extends BaseRunner {
+
 	public TestsRunner() {
 		super("coverage-raw");
 	}
 
 	@Override
-	public int innerExecute(Path current, Request request, Path logFile, CompileRequest item) {
-		if (item.testName.contains("_scaffolding")) {
-			return 0;
+	public int innerExecute(RunnerRequest request) {
+
+		List<String> names = new ArrayList<String>();
+		for (CompileRequest item : request.items) {
+			if (item.testName.contains("_scaffolding")) {
+				continue;
+			}
+
+			names.add(item.testName);
 		}
-
-		final Path outFile = Paths.get(getOutputDir(current).toFile().getAbsolutePath(), item.testName + ".exec");
-
-		return runJacoco(item, logFile, outFile);
+		if (names.isEmpty()) {
+			return -1;
+		}
+		final Path outFile = Paths.get(request.outDirectory.toFile().getAbsolutePath(), "data.exec");
+		return runJacoco(names, request, outFile);
 
 	}
 
-	public static int runJacoco(CompileRequest request, Path log, Path outFile) {
+	public static int runJacoco(List<String> tests, RunnerRequest request, Path outFile) {
 		try {
 			CommandLine line = new CommandLine("java")
 					.addArgument("-javaagent:/home/junit/libs/jacocoagent.jar=destfile="
 							+ outFile.toFile().getAbsolutePath())
-					.addArgument("-cp").addArgument(String.join(File.pathSeparator, request.getAllCpsForPit()));
+					.addArgument("-cp").addArgument(String.join(File.pathSeparator, request.allPaths()));
 			line.addArgument("org.junit.runner.JUnitCore");
-			line.addArgument(request.testName);
-			return Utils.launch(new File(request.workingDir), line, log);
+			for (String test : tests) {
+				line.addArgument(test);
+			}
+
+			return Utils.launch(request.workingPath.toFile(), line, request.logFile);
 		} catch (Throwable e) {
-			log("was not able to run pit:" + request.testName + " at " + request.workingDir);
+			log("was not able to runs tests:" + " at " + request.workingPath);
 			return -1;
 		}
 	}

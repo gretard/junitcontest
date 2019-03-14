@@ -3,10 +3,13 @@ package sbst.pit.runner.junit;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 
 import sbst.pit.runner.BaseRunner;
+import sbst.pit.runner.RunnerRequest;
 import sbst.pit.runner.Utils;
 import sbst.pit.runner.models.CompileRequest;
 import sbst.pit.runner.models.Request;
@@ -15,49 +18,52 @@ public class JacocoMetricsReporter extends BaseRunner {
 	public JacocoMetricsReporter() {
 		super("coverage-reports");
 	}
-
 	@Override
-	public int innerExecute(Path current, Request request, Path logFile, CompileRequest item) {
-
-		if (item.testName.contains("_scaffolding")) {
-			return 0;
+	public int innerExecute(RunnerRequest r) {
+		
+		List<String> tests = new ArrayList<String>();
+		for (CompileRequest item : r.items) {
+			if (item.testName.contains("_scaffolding")) {
+				continue;
+			}
+			tests.add(item.testName);
 		}
-
-		final String inputDir = Paths.get(current.toFile().getAbsolutePath(), "coverage-raw").toFile()
+		if (tests.isEmpty()) {
+			return -1;
+		}
+		final String inputDir = Paths.get(r.workingPath.toFile().getAbsolutePath(), "coverage-raw").toFile()
 				.getAbsolutePath();
-		final Path inputFile = Paths.get(inputDir, item.testName + ".exec");
-
+		final Path inputFile = Paths.get(inputDir, "data.exec");
 		if (!inputFile.toFile().exists()) {
 			System.out.println("Input file not found "+inputFile);
-			return -2;
+			return -1;
 		}
-
-		final Path outDirectory = Paths.get(getOutputDir(current).toFile().getAbsolutePath(), item.testName);
-
-		return runJacoco(item, logFile, inputFile, outDirectory.toFile().getAbsoluteFile().getAbsolutePath());
-
+		return runJacoco(r, inputFile);
+		
+		
 	}
+	
 
-	public static int runJacoco(CompileRequest request, Path log, Path inputFile, String reportsDir) {
+	public static int runJacoco(RunnerRequest request, Path inputFile) {
 		try {
-			new File(reportsDir).mkdirs();
+			//new File(reportsDir).mkdirs();
 			CommandLine line = new CommandLine("java").addArgument("-jar")
 					.addArgument("/home/junit/libs/jacococli.jar");
 			line.addArgument("report");
 			line.addArgument(inputFile.toFile().getAbsolutePath());
-			for (String s : request.getJacocoAllCps()) {
+			for (String s : request.bench.classpath) {
 				line.addArgument("--classfiles");
 				line.addArgument(s);
 			}
 			line.addArgument("--sourcefiles");
 			line.addArgument(String.join(",", request.bench.src));
 			line.addArgument("--html");
-			line.addArgument(reportsDir + File.separator + "html");
+			line.addArgument(request.outDirectory.toFile().getAbsolutePath() + File.separator + "html");
 			line.addArgument("--csv");
-			line.addArgument(reportsDir + File.separator + "coverage.csv");
-			return Utils.launch(new File(request.workingDir), line, log);
+			line.addArgument(request.outDirectory.toFile().getAbsolutePath() + File.separator + "coverage.csv");
+			return Utils.launch(request.workingPath.toFile(), line, request.logFile);
 		} catch (Throwable e) {
-			log("was not able to run pit:" + request.testName + " at " + request.workingDir);
+			log("was not able instrument:" + request.workingPath);
 			return -1;
 		}
 	}

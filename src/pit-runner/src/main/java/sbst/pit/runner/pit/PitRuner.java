@@ -1,44 +1,48 @@
 package sbst.pit.runner.pit;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.exec.CommandLine;
 
 import sbst.pit.runner.BaseRunner;
+import sbst.pit.runner.RunnerRequest;
 import sbst.pit.runner.Utils;
-import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.CompileRequest;
-import sbst.pit.runner.models.Request;
 
 public class PitRuner extends BaseRunner {
 
 	public PitRuner() {
 		super("pit-reports");
 	}
-	
+
 	@Override
-	public int innerExecute(Path current, Request request, Path logFile, CompileRequest item) {
-		if (item.testName.contains("_scaffolding")) {
-			return 0;
+	public int innerExecute(RunnerRequest request) {
+
+		List<String> names = new ArrayList<String>();
+		for (CompileRequest item : request.items) {
+			if (item.testName.contains("_scaffolding")) {
+				continue;
+			}
+
+			names.add(item.testName);
 		}
-		Path reportsDir= getOutputDir(current);
-		
-		return runPit(item, logFile, reportsDir);
-		
+		if (names.isEmpty()) {
+			System.out.println("No tests found");
+			return -1;
+		}
+
+		return runPit(names, request);
+
 	}
 
-	public static int runPit(CompileRequest request, Path log, Path reportsDir) {
+	public static int runPit(List<String> tests, RunnerRequest request) {
 		try {
 			CommandLine line = new CommandLine("java").addArgument("-cp")
-					.addArgument(String.join(File.pathSeparator, request.getAllCpsForPit()));
+					.addArgument(String.join(File.pathSeparator, request.allPaths()));
 			line.addArgument("org.pitest.mutationtest.commandline.MutationCoverageReport");
-			//line.addArgument("--verbose");
+			line.addArgument("--verbose");
 			line.addArgument("--timestampedReports");
 			line.addArgument("false");
 			line.addArgument("--exportLineCoverage");
@@ -48,19 +52,19 @@ public class PitRuner extends BaseRunner {
 			line.addArgument("--targetClasses");
 			line.addArgument(String.join(",", request.bench.classes));
 			line.addArgument("--targetTests");
-			line.addArgument(request.testName);
+			line.addArgument(String.join(",", tests));
 			line.addArgument("--sourceDirs");
 			line.addArgument(request.bench.src);
 			line.addArgument("--reportDir");
-			line.addArgument(reportsDir.toAbsolutePath().toFile().getAbsolutePath());
+			line.addArgument(request.outDirectory.toAbsolutePath().toFile().getAbsolutePath());
 			line.addArgument("--outputFormats");
 			line.addArgument("csv,html,xml");
-			return Utils.launch(new File(request.workingDir), line, log);
+			return Utils.launch(request.workingPath.toFile(), line, request.logFile);
 		} catch (Throwable e) {
-			log("was not able to run pit:" + request.testName + " at " + request.workingDir);
+			e.printStackTrace();
+			log("was not able to run pit: at " + request.workingPath);
 			return -1;
 		}
 	}
 
-	
 }

@@ -57,69 +57,69 @@ public abstract class BaseRunner implements IExecutor {
 					this.getClass().getSimpleName().toLowerCase() + ".log");
 
 			final Path outDirectory = getOutputDir(base);
-			
-			if (logFile.toFile().exists() && 
-					!request.force && 
-					outDirectory.toFile().exists() 
+
+			if (logFile.toFile().exists() && !request.force && outDirectory.toFile().exists()
 					&& outDirectory.toFile().listFiles().length > 0) {
 				return;
 			}
 
-			List<CompileRequest> tests = getTests(request.libsDir, benchmarks.get(benchName), base);
-			if (tests.size() == 0) {
+			RunnerRequest r = getTests(request.libsDir, benchmarks.get(benchName), base);
+			if (r.items.size() == 0) {
 				return;
 			}
-			log(name + " found " + tests.size()+" to work on");
+			log(name + " found " + r.items.size() + " to work on");
 			Utils.deleteOld(outDirectory, true);
 			Utils.deleteOld(logFile, false);
-					
-				service.submit(new Runnable() {
-				
-					@Override
-					public void run() {
-						tests.forEach(t -> {
-							if (innerExecute(base, request, logFile, t) != 0) {
-								log(name + " ERROR " + t.testName + " "
-										+ base.toFile().getAbsolutePath());
-								logError(base, request, t);
-							} else {
-								log(name + " OK " + t.testName + " "
-										+ base.toFile().getAbsolutePath());
-							}
-						});
-					}
-				});
 
+			service.submit(new Runnable() {
+
+				
+				@Override
+				public void run() {
+					
+					r.logFile = logFile;
+					r.workingPath = base;
+					r.outDirectory = outDirectory;
+					if (innerExecute(r) != 0) {
+						log(name + " ERROR " + base.toFile().getAbsolutePath());
+						logError(base, request);
+					} else {
+						log(name + " OK " + base.toFile().getAbsolutePath());
+					}
+				}
 			});
 
-
+		});
 
 		service.shutdown();
-		
+
 		log(name + " waiting for finish...");
 		service.awaitTermination(2, TimeUnit.HOURS);
 		service.shutdownNow();
 
 	}
 
-	public abstract int innerExecute(Path current, Request request, Path logFile, CompileRequest item);
+	public abstract int innerExecute(RunnerRequest request);
 
-	public void logError(Path current, Request request, CompileRequest data) {
+	public void logError(Path current, Request request) {
 		try {
-			FileUtils.write(new File(request.baseDir, "errrors.txt"),
-					this.getClass().getSimpleName() + "\t" + current+"\t"+data.sourceFile + "\t" + data.testName + "\r\n", true);
+			FileUtils.write(new File(request.baseDir, "errrors.txt"), this.getClass().getSimpleName() + "\t" +
+		current.toFile().getAbsolutePath()+
+					"\r\n", true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static List<CompileRequest> getTests(final List<String> libsDir, Bench bench, final Path base) {
+	public static RunnerRequest getTests(final List<String> libsDir, Bench bench, final Path base) {
 		List<CompileRequest> tests = new ArrayList<>();
 		List<CompileRequest> other = new ArrayList<>();
+		List<CompileRequest> post = new ArrayList<>();
+		// RegTest
 		final Path generatedTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "testcases");
 		final Path compiledTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "bin");
 		try {
-		
+
 			Files.walk(generatedTestsDirectory).filter(x -> x.toFile().getAbsolutePath().contains(".java"))
 					.forEach(t -> {
 
@@ -138,9 +138,14 @@ public abstract class BaseRunner implements IExecutor {
 						r.extra.addAll(libsDir);
 						if (testName.toLowerCase().contains("_scaffolding")) {
 							other.add(0, r);
-						} else {
-							tests.add(r);
+							return;
 						}
+						if (testName.toLowerCase().endsWith("regtest")) {
+							post.add(r);
+							return;
+						}
+
+						tests.add(r);
 
 					});
 		} catch (Throwable e1) {
@@ -149,7 +154,14 @@ public abstract class BaseRunner implements IExecutor {
 		List<CompileRequest> main = new ArrayList<>();
 		main.addAll(other);
 		main.addAll(tests);
-		return main;
+		main.addAll(post);
+		
+		RunnerRequest r = new RunnerRequest();
+		r.bench = bench;
+		r.paths.addAll(libsDir);
+		r.testsPath = compiledTestsDirectory.toAbsolutePath().toFile().getAbsolutePath();
+		r.items.addAll(main);
+		return r;
 	}
 
 }
