@@ -24,7 +24,7 @@ public class CompilationRunner extends BaseRunner {
 
 				CommandLine line = new CommandLine("javac").addArgument("-Xlint:-unchecked").addArgument("-verbose")
 						.addArgument("-s").addArgument(request.src).addArgument("-cp")
-						.addArgument(String.join(File.pathSeparator, r.allCpPaths())).addArgument("-d")
+						.addArgument(String.join(File.pathSeparator, r.allPaths())).addArgument("-d")
 						.addArgument(request.testBinDir).addArgument(request.sourceFile);
 				System.out.println(line.toString());
 				status += Utils.launch(r.workingPath.toFile(), line, r.logFile); 

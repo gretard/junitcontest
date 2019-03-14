@@ -27,7 +27,9 @@ public class TestsRunner extends BaseRunner {
 			if (item.testName.contains("_scaffolding")) {
 				continue;
 			}
-
+			if (item.testName.toLowerCase().endsWith("regtest")) {
+				continue;
+			}
 			names.add(item.testName);
 		}
 		if (names.isEmpty()) {

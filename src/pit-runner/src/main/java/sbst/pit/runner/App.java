@@ -54,12 +54,9 @@ public class App {
 			configFile = args[3];
 		}
 
-		IExecutor[] runners = new IExecutor[] {
-				new CompilationRunner(), new PitRuner()/*
-										 * , new TestsRunner(), new JacocoMetricsReporter(), new
-										 * PitMetricsCollector(), new TestMetricsCollector(), new
-										 * ProjectMetricsCollector(), new JacocoMetricsCollector()
-										 */
+		IExecutor[] runners = new IExecutor[] { new CompilationRunner(), new PitRuner(), new TestsRunner(),
+				new JacocoMetricsReporter(), new PitMetricsCollector(), new TestMetricsCollector(),
+				new ProjectMetricsCollector(), new JacocoMetricsCollector()
 
 		};
 

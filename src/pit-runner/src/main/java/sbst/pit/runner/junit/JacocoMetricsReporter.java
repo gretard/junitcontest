@@ -51,7 +51,7 @@ public class JacocoMetricsReporter extends BaseRunner {
 					.addArgument("/home/junit/libs/jacococli.jar");
 			line.addArgument("report");
 			line.addArgument(inputFile.toFile().getAbsolutePath());
-			for (String s : request.bench.classpath) {
+			for (String s : request.getJacocoAllCps()) {
 				line.addArgument("--classfiles");
 				line.addArgument(s);
 			}
