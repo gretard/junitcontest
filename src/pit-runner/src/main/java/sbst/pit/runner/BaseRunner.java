@@ -1,7 +1,6 @@
 package sbst.pit.runner;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.FileUtils;
 
@@ -43,7 +43,11 @@ public abstract class BaseRunner implements IExecutor {
 		final String name = this.getClass().getSimpleName();
 		final ExecutorService service = Executors.newWorkStealingPool(8);
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
-		//final FileWriter writer = new FileWriter(Paths.get(request.baseDir, "ok.txt").toFile());
+		
+		AtomicLong tasksCount = new AtomicLong();
+		AtomicLong totalCount = new AtomicLong();
+		AtomicLong totalRun = new AtomicLong();
+
 		Files.walk(Paths.get(request.baseDir), 9999).forEach(e -> {
 
 			try {
@@ -65,7 +69,7 @@ public abstract class BaseRunner implements IExecutor {
 				final Path outDirectory = getOutputDir(base);
 
 				boolean forceRun = this.mode.isSet(request.mode);
-
+				totalCount.incrementAndGet();
 				if (!forceRun && logFile.toFile().exists() && outDirectory.toFile().exists()
 						&& outDirectory.toFile().listFiles().length > 0) {
 					return;
@@ -78,24 +82,17 @@ public abstract class BaseRunner implements IExecutor {
 
 				Utils.deleteOld(outDirectory, true);
 				Utils.deleteOld(logFile, false);
-
+				tasksCount.incrementAndGet();
 				service.submit(new Runnable() {
 
 					@Override
 					public void run() {
-
+						totalRun.incrementAndGet();
 						r.logFile = logFile;
 						r.workingPath = base;
 						r.outDirectory = outDirectory;
 						if (innerExecute(r) != 0) {
-							log(name + " ERROR " + base.toFile().getAbsolutePath());
-							logError(base, request);
-						} else {
-							/*
-							 * try { writer.write(name + " OK " + base.toFile().getAbsolutePath()+"\r\n"); }
-							 * catch (IOException e) { // TODO Auto-generated catch block
-							 * e.printStackTrace(); }
-							 */
+							logError(request.baseDir, name + " ERROR " + base.toFile().getAbsolutePath());
 						}
 					}
 				});
@@ -106,20 +103,19 @@ public abstract class BaseRunner implements IExecutor {
 		});
 
 		service.shutdown();
-	
-		log(name + " waiting for finish...");
+		logError(request.baseDir, " waiting for finish... tasks: " + tasksCount.get()+" total: "+totalCount.get());
 		service.awaitTermination(2, TimeUnit.HOURS);
 		service.shutdownNow();
-	//writer.close();
+		logError(request.baseDir, " finished... tasks: " + tasksCount.get()+" total: "+totalCount.get()+" total run: "+totalRun.get());
+
 	}
 
 	public abstract int innerExecute(RunnerRequest request);
 
-	public void logError(Path current, Request request) {
+	public void logError(String base, String line) {
 		try {
-			String line = this.getClass().getSimpleName() + "\t" + current.toFile().getAbsolutePath();
-			FileUtils.write(new File(request.baseDir, "errrors.txt"),
-					 line+ "\r\n", true);
+			System.out.println(line);
+			FileUtils.write(new File(base, "errrors.txt"), line + "\r\n", true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
