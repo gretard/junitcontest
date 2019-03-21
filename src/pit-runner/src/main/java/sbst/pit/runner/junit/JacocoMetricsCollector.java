@@ -22,10 +22,6 @@ public class JacocoMetricsCollector implements IExecutor {
 		try {
 			Path outPath = Paths.get(request.baseDir, "jacoco.csv");
 			File outFile = outPath.toFile();
-
-			if (outFile.exists() && !Modes.METRICS.isSet(request.mode)) {
-				return;
-			}
 			
 			Utils.deleteOld(outPath, false);
 

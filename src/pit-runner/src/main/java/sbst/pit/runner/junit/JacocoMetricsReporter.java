@@ -19,9 +19,10 @@ public class JacocoMetricsReporter extends BaseRunner {
 	public JacocoMetricsReporter() {
 		super("coverage-reports", Modes.COVERAGE);
 	}
+
 	@Override
 	public int innerExecute(RunnerRequest r) {
-		
+
 		List<String> tests = new ArrayList<String>();
 		for (CompileRequest item : r.items) {
 			if (item.testName.contains("_scaffolding")) {
@@ -36,20 +37,18 @@ public class JacocoMetricsReporter extends BaseRunner {
 				.getAbsolutePath();
 		final Path inputFile = Paths.get(inputDir, "data.exec");
 		if (!inputFile.toFile().exists()) {
-			System.out.println("Input file not found "+inputFile);
+			System.out.println("Input file not found " + inputFile);
 			return -1;
 		}
 		return runJacoco(r, inputFile);
-		
-		
+
 	}
-	
 
 	public static int runJacoco(RunnerRequest request, Path inputFile) {
 		try {
-		
+
 			CommandLine line = new CommandLine("java").addArgument("-jar")
-					.addArgument("/home/junit/libs/jacococli.jar");
+					.addArgument(request.paths + "/jacococli.jar");
 			line.addArgument("report");
 			line.addArgument(inputFile.toFile().getAbsolutePath());
 			for (String s : request.getJacocoAllCps()) {

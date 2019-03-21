@@ -54,7 +54,7 @@ public class Utils {
 			executor.setStreamHandler(streamHandler);
 			executor.setWorkingDirectory(baseDir);
 			int exitValue = executor.execute(line);
-
+		//	System.out.println("Run ok: "+line);
 			return exitValue;
 		} catch (Throwable e) {
 			System.out.println("An exception occurred during the execution of command " + line.toString());

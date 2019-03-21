@@ -20,47 +20,4 @@ public class CompileRequest {
 		return reportsDir + File.separator + testName;
 	}
 	
-	public List<String> getAllCps() {
-		List<String> cps = new ArrayList<>();
-		cps.addAll(extra);
-		for (String x : bench.classpath) {
-			String t = x;
-			if (!new File(t).exists()) {
-				continue;
-			}
-			if (x.endsWith("dependency")) {
-				t = x + File.separator + "*";
-			}
-			cps.add(t);
-		}
-
-		return cps;
-	}
-	public List<String> getJacocoAllCps() {
-		List<String> cps = new ArrayList<>();
-		for (String x : bench.classpath) {
-			String t = x;
-			if (!new File(t).exists() || x.endsWith("dependency")) {
-				continue;
-			}
-		
-			cps.add(t);
-		}
-
-		return cps;
-	}
-	public List<String> getAllCpsForPit() {
-		List<String> cps = new ArrayList<>();
-		cps.addAll(extra);
-		for (String x : bench.classpath) {
-
-			String t = x;
-			if (x.endsWith("dependency")) {
-				t = x + File.separator + "*";
-			}
-			cps.add(t);
-		}
-		cps.add(testBinDir);
-		return cps;
-	}
 }

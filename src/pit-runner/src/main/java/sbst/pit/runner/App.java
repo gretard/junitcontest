@@ -1,9 +1,7 @@
 package sbst.pit.runner;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import sbst.pit.runner.compilation.CompilationRunner;
 import sbst.pit.runner.junit.JacocoMetricsCollector;
@@ -44,19 +42,10 @@ public class App {
 		final int mode = args.length > 0 ? Integer.parseInt(args[0]) : Modes.DEFAULT.getMode();
 		System.out.println("Args were: " + Arrays.toString(args));
 		final String baseDir = args.length > 1 ? args[1] : ".";
-		String configFile = "/var/benchmarks/conf/benchmarks.list";
 
-		final List<String> libsDir = new ArrayList<>();
-		libsDir.add("/home/junit/libs/*");
+		final String libsDir = args.length > 2 ? args[2] : "/home/junit/libs";
 
-		if (args.length > 2) {
-			libsDir.clear();
-			libsDir.addAll(Arrays.asList(args[2].split(",")));
-		}
-
-		if (args.length > 3) {
-			configFile = args[3];
-		}
+		final String configFile = args.length > 3 ? args[3] : "/var/benchmarks/conf/benchmarks.list";
 
 		IExecutor[] runners = new IExecutor[] { new CompilationRunner(), new PitRuner(), new TestsRunner(),
 				new JacocoMetricsReporter(), new PitMetricsCollector(), new TestMetricsCollector(),
@@ -68,7 +57,7 @@ public class App {
 		request.baseDir = new File(baseDir).getAbsolutePath();
 		request.configFile = configFile;
 		request.mode = mode;
-		request.libsDir.addAll(libsDir);
+		request.libsDir = libsDir;
 
 		for (IExecutor runner : runners) {
 			runner.execute(request);

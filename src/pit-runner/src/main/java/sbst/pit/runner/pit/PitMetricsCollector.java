@@ -23,10 +23,7 @@ public class PitMetricsCollector implements IExecutor {
 			Path outPath = Paths.get(request.baseDir, "mutations-summary.csv");
 			File outFile = outPath.toFile();
 
-			if (outFile.exists() && !Modes.METRICS.isSet(request.mode)) {
-				return;
-			}
-
+			
 			Utils.deleteOld(outPath, false);
 
 			Files.walk(Paths.get(request.baseDir), 9999)

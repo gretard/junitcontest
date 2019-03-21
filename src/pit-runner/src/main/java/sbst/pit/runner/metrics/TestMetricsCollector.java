@@ -18,9 +18,6 @@ public class TestMetricsCollector implements IExecutor {
 		String baseDir = request.baseDir;
 		File metricsFile = Paths.get(baseDir, "testMetrics.csv").toFile();
 
-		if (metricsFile.exists() && !Modes.METRICS.isSet(request.mode)) {
-			return;
-		}
 	
 		Utils.deleteOld(Paths.get(baseDir, "testMetrics.csv"), false);
 		Files.walk(Paths.get(baseDir), 9999)

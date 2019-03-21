@@ -44,7 +44,7 @@ public class TestsRunner extends BaseRunner {
 	public static int runJacoco(List<String> tests, RunnerRequest request, Path outFile) {
 		try {
 			CommandLine line = new CommandLine("java")
-					.addArgument("-javaagent:/home/junit/libs/jacocoagent.jar=destfile="
+					.addArgument("-javaagent:" + request.paths + "/jacocoagent.jar=destfile="
 							+ outFile.toFile().getAbsolutePath())
 					.addArgument("-cp").addArgument(String.join(File.pathSeparator, request.allPaths()));
 			line.addArgument("org.junit.runner.JUnitCore");

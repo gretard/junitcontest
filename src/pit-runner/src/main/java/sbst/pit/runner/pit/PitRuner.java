@@ -45,7 +45,7 @@ public class PitRuner extends BaseRunner {
 			CommandLine line = new CommandLine("java").addArgument("-cp")
 					.addArgument(String.join(File.pathSeparator, request.allPaths()));
 			line.addArgument("org.pitest.mutationtest.commandline.MutationCoverageReport");
-			line.addArgument("--verbose");
+			//line.addArgument("--verbose");
 			line.addArgument("--timestampedReports");
 			line.addArgument("false");
 			line.addArgument("--exportLineCoverage");

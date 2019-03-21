@@ -40,10 +40,9 @@ public abstract class BaseRunner implements IExecutor {
 	}
 
 	public void execute(Request request) throws Throwable {
-		final String name = this.getClass().getSimpleName();
 		final ExecutorService service = Executors.newWorkStealingPool(8);
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
-		
+
 		AtomicLong tasksCount = new AtomicLong();
 		AtomicLong totalCount = new AtomicLong();
 		AtomicLong totalRun = new AtomicLong();
@@ -92,7 +91,7 @@ public abstract class BaseRunner implements IExecutor {
 						r.workingPath = base;
 						r.outDirectory = outDirectory;
 						if (innerExecute(r) != 0) {
-							logError(request.baseDir, name + " ERROR " + base.toFile().getAbsolutePath());
+							logError(request.baseDir, " ERROR " + base.toFile().getAbsolutePath());
 						}
 					}
 				});
@@ -103,10 +102,17 @@ public abstract class BaseRunner implements IExecutor {
 		});
 
 		service.shutdown();
-		logError(request.baseDir, " waiting for finish... tasks: " + tasksCount.get()+" total: "+totalCount.get());
-		service.awaitTermination(2, TimeUnit.HOURS);
+		logError(request.baseDir, " waiting for finish... tasks: " + tasksCount.get() + " total: " + totalCount.get());
+		long start = System.currentTimeMillis();
+		while (!service.isTerminated() && (System.currentTimeMillis() - start) < TimeUnit.HOURS.toMillis(4)) {
+			Thread.sleep(TimeUnit.MINUTES.toMillis(2));
+			logError(request.baseDir, " waiting for tasks: " + tasksCount.get() + " run: " + totalRun.get());
+
+		}
+		// service.awaitTermination(4, TimeUnit.HOURS);
 		service.shutdownNow();
-		logError(request.baseDir, " finished... tasks: " + tasksCount.get()+" total: "+totalCount.get()+" total run: "+totalRun.get());
+		logError(request.baseDir, " finished... tasks: " + tasksCount.get() + " total: " + totalCount.get()
+				+ " total run: " + totalRun.get());
 
 	}
 
@@ -114,14 +120,16 @@ public abstract class BaseRunner implements IExecutor {
 
 	public void logError(String base, String line) {
 		try {
-			System.out.println(line);
-			FileUtils.write(new File(base, "errrors.txt"), line + "\r\n", true);
+			final String name = this.getClass().getSimpleName();
+
+			System.out.println(name + " " + line);
+			FileUtils.write(new File(base, "errrors.txt"), name + " " + line + "\r\n", true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static RunnerRequest getTests(final List<String> libsDir, Bench bench, final Path base) {
+	public static RunnerRequest getTests(final String libsDir, Bench bench, final Path base) {
 		List<CompileRequest> tests = new ArrayList<>();
 		List<CompileRequest> other = new ArrayList<>();
 		List<CompileRequest> post = new ArrayList<>();
@@ -145,7 +153,6 @@ public abstract class BaseRunner implements IExecutor {
 						r.workingDir = base.toFile().getAbsolutePath();
 						r.testName = testName;
 						r.testBinDir = compiledTestsDirectory.toFile().getAbsolutePath();
-						r.extra.addAll(libsDir);
 						if (testName.toLowerCase().contains("_scaffolding")) {
 							other.add(0, r);
 							return;
@@ -168,7 +175,7 @@ public abstract class BaseRunner implements IExecutor {
 
 		RunnerRequest r = new RunnerRequest();
 		r.bench = bench;
-		r.paths.addAll(libsDir);
+		r.paths = libsDir;
 		r.testsPath = compiledTestsDirectory.toAbsolutePath().toFile().getAbsolutePath();
 		r.items.addAll(main);
 		return r;
