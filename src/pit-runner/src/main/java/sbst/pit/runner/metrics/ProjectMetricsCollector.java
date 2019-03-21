@@ -1,31 +1,36 @@
 package sbst.pit.runner.metrics;
 
-import java.io.File;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
 
-import sbst.pit.runner.IExecutor;
+import sbst.pit.runner.BaseCollector;
 import sbst.pit.runner.Utils;
-import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.Request;
 
-public class ProjectMetricsCollector implements IExecutor {
+public class ProjectMetricsCollector extends BaseCollector {
+	public ProjectMetricsCollector() {
+		super("metrics.csv");
+	}
+
 	MetricsCollector collector = new MetricsCollector();
 
-	@Override
-	public void execute(Request request) throws Throwable {
-		String configFile = request.configFile;
-		File metricsFile = Paths.get(request.baseDir, "metrics.csv").toFile();
+	private void writeHeader(Writer writer) throws IOException {
+		writer.write("benchmark\tclassz" + "\tcomplexity" + "\tinstructions" + "\tnumberOfTests"
+				+ "\tnumberOfConsturctors" + "\tnumberOfMethods" + "\tpublicMethods" + "\tstaticMethods"
+				+ "\tnumberOfReturns" + "\toverridenMethods" + "\r\n");
+	}
 
-		
-		
-		final Map<String, Bench> benchmarks = Utils.getBenchmarks(configFile);
-		Utils.deleteOld(Paths.get(request.baseDir, "metrics.csv"), false);
+	@Override
+	protected void collect(Writer writer, Request request) throws Throwable {
+		writeHeader(writer);
+		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
 		benchmarks.forEach((k, v) -> {
 			v.additionalInfo = k + "\t";
 			v.additionalInfoHeader = "benchmark\t";
-			collector.collectMetrics(v, metricsFile);
+			collector.collectMetrics(v, writer);
 		});
+
 	}
 }

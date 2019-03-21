@@ -2,6 +2,7 @@ package sbst.pit.runner.metrics;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ import soot.Transform;
 import soot.options.Options;
 
 public class MetricsCollector {
-	public void collectMetrics(BaseRequest request, File outFile) {
+	public void collectMetrics(BaseRequest request, Writer outFile) {
 		soot.G.reset();
 		final StringBuffer sb = new StringBuffer();
 		sb.append(System.getProperty("java.class.path") + File.pathSeparator);
@@ -67,35 +68,21 @@ public class MetricsCollector {
 		pack.add(new Transform("jtp.atg", transformer));
 		PhaseOptions.v().setPhaseOption("jtp.atg", "on");
 		final String[] arguments = options.toArray(new String[0]);
-		// System.out.println("Starting soot transformation with arguments: " +
-		// Arrays.toString(arguments));
+
 		soot.Main.main(arguments);
-		if (!outFile.exists()) {
-			try {
-				FileUtils.write(outFile,
-						request.additionalInfoHeader + "classz" + "\tcomplexity" + "\tinstructions" + "\tnumberOfTests"
-								+ "\tnumberOfConsturctors" + "\tnumberOfMethods" + "\tpublicMethods" + "\tstaticMethods"
-								+ "\tnumberOfReturns" + "\toverridenMethods" + "\r\n",
-						true);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		
+	/*	*/
 		Map<String, Metrics> info = transformer.getData();
 		request.classes.forEach(k -> {
 			Metrics v = info.getOrDefault(k, new Metrics());
 			try {
-				FileUtils.write(outFile,
-						request.additionalInfo + k + "\t" + v.complexity + "\t" + v.instructions + "\t"
+				outFile.write(request.additionalInfo + k + "\t" + v.complexity + "\t" + v.instructions + "\t"
 								+ v.numberOfTests + "\t" + v.noc + "\t" + v.nom + "\t" + v.nopm + "\t" + v.nosm + "\t"
-								+ v.nor + "\t" + v.noom + "\r\n",
-						true);
+								+ v.nor + "\t" + v.noom + "\r\n"
+						);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		});
-		transformer.getData().forEach((k, v) -> {
-
 		});
 
 	}

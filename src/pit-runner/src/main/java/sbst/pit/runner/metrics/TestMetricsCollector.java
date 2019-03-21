@@ -1,27 +1,33 @@
 package sbst.pit.runner.metrics;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import sbst.pit.runner.App.Modes;
-import sbst.pit.runner.IExecutor;
-import sbst.pit.runner.Utils;
+import sbst.pit.runner.BaseCollector;
 import sbst.pit.runner.models.BaseRequest;
 import sbst.pit.runner.models.Request;
 
-public class TestMetricsCollector implements IExecutor {
+public class TestMetricsCollector extends BaseCollector {
+	public TestMetricsCollector() {
+		super("testMetrics.csv");
+	}
+
 	MetricsCollector collector = new MetricsCollector();
 
-	@Override
-	public void execute(Request request) throws Throwable {
-		String baseDir = request.baseDir;
-		File metricsFile = Paths.get(baseDir, "testMetrics.csv").toFile();
+	private void writeHeader(Writer writer) throws IOException {
+		writer.write("benchmark\ttool\tbudget\trun\tclassz" + "\tcomplexity" + "\tinstructions" + "\tnumberOfTests"
+				+ "\tnumberOfConsturctors" + "\tnumberOfMethods" + "\tpublicMethods" + "\tstaticMethods"
+				+ "\tnumberOfReturns" + "\toverridenMethods" + "\r\n");
+	}
 
-		Utils.deleteOld(Paths.get(baseDir, "testMetrics.csv"), false);
-		
-		Files.walk(Paths.get(baseDir), 9999)
+	@Override
+	protected void collect(Writer writer, Request request) throws Throwable {
+		writeHeader(writer);
+		Files.walk(Paths.get(request.baseDir), 9999)
 				.filter(x -> x.toFile().getAbsolutePath().contains("temp" + File.separator + "bin")).forEach(x -> {
 					if (!x.toFile().getAbsolutePath().endsWith(".class")) {
 						return;
@@ -42,7 +48,7 @@ public class TestMetricsCollector implements IExecutor {
 					baseRequest.additionalInfo = benchmark + "\t" + tool + "\t" + budget + "\t" + run + "\t";
 					baseRequest.classpath.add(classPath);
 					baseRequest.classes.add(classz);
-					collector.collectMetrics(baseRequest, metricsFile);
+					collector.collectMetrics(baseRequest, writer);
 				});
 
 	}
