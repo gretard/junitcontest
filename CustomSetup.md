@@ -72,9 +72,9 @@ cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./t
 cd /home/junit
 
 mkdir ./tools/randoop/lib
-https://github.com/randoop/randoop/releases/download/v4.1.0/randoop-all-4.1.0.jar -O ./tools/randoop/lib/randoop.jar
-mvn -DskipTests clean install dependency:copy-dependencies -f ./tools/randoop/sbstcontest/pom.xml
-cp ./tools/randoop/sbstcontest/target/dependency/* ./tools/randoop/lib/dependency
+wget https://github.com/randoop/randoop/releases/download/v4.1.0/randoop-all-4.1.0.jar -O ./tools/randoop/lib/randoop.jar
+cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/randoop/lib
+
 ```
 
 ## Running experiments
