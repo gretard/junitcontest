@@ -31,7 +31,7 @@ public abstract class BaseCollector implements IExecutor {
 		try (final BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outFile))) {
 			try {
 				if (header != null) {
-					bufferedWriter.write(this.header);
+					bufferedWriter.append(this.header);
 				}
 				collect(bufferedWriter, request);
 			} catch (Throwable e) {
