@@ -32,7 +32,7 @@ done
 cd /home/junit
 
 mvn clean install -f ./src/benchgenerator/pom.xml
-java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list"
+java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list" 9999 true /home/junit/tools/project-stats.csv
 
 mvn clean install -f ./src/pit-runner/pom.xml
 cp ./src/pit-runner/target/*.jar ./tools/
