@@ -11,10 +11,16 @@ import sbst.pit.runner.models.Request;
 
 public abstract class BaseCollector implements IExecutor {
 
-	private String fileName;
+	private final String fileName;
+	private final String header;
 
 	public BaseCollector(String fileName) {
+		this(fileName, null);
+	}
+
+	public BaseCollector(String fileName, String header) {
 		this.fileName = fileName;
+		this.header = header;
 	}
 
 	@Override
@@ -24,6 +30,9 @@ public abstract class BaseCollector implements IExecutor {
 		Utils.deleteOld(outPath, false);
 		try (final BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outFile))) {
 			try {
+				if (header != null) {
+					bufferedWriter.write(this.header);
+				}
 				collect(bufferedWriter, request);
 			} catch (Throwable e) {
 				e.printStackTrace();

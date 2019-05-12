@@ -14,7 +14,7 @@ import sbst.pit.runner.models.Request;
 public class PitMetricsCollector extends BaseCollector {
 
 	public PitMetricsCollector() {
-		super("mutations-summary.csv");
+		super("mutations-summary.csv", "benchmark,run,tool,budget,file,class,mutator,method,line,status,killedBy\r\n");
 	}
 
 	private void extract(final Writer bufferedWriter, final Stream<Path> stream) {
