@@ -84,6 +84,15 @@ docker attach junitcontest
 cd /home/junit/tools/atg
 
 
+cd /home/junit/tools/atg; 
+contest_generate_tests.sh atg 1 1 30;
+cd /home/junit/tools/evosuite;
+contest_generate_tests.sh evosuite 1 1 30;
+cd /home/junit/tools/randoop;
+contest_generate_tests.sh randoop 1 1 30;
+
+
+
 contest_generate_tests.sh atg 1 1 30
 contest_compute_metrics.sh results_atg_30 
 contest_transcript_single.sh .
