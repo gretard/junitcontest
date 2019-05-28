@@ -46,7 +46,7 @@ public class JacocoMetricsCollector extends BaseCollector {
 								writer.write("project,benchmark,run,tool,budget," + line + "\r\n");
 								continue;
 							}
-							writer.write(project,benchName + "," + run + "," + tool + "," + budget + "," + line + "\r\n");
+							writer.write(project+","+benchName + "," + run + "," + tool + "," + budget + "," + line + "\r\n");
 						}
 
 					} catch (Exception e) {
