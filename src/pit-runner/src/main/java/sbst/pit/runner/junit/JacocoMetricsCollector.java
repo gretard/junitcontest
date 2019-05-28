@@ -30,6 +30,7 @@ public class JacocoMetricsCollector extends BaseCollector {
 						Path u = Paths.get(x.toString().split("temp")[0]);
 						final String run = u.getFileName().toString();
 						final String benchName = u.getFileName().toString().split("_")[0];
+						final String project = extractProject(benchName);
 						final String tool = u.getParent().toString().split("results_")[1].split("_")[0];
 						final String budget = u.getParent().toString().split("results_")[1].split("_")[1];
 						final List<String> lines = FileUtils.readLines(x.toFile());
@@ -42,10 +43,10 @@ public class JacocoMetricsCollector extends BaseCollector {
 						for (int i = startLine; i < lines.size(); i++) {
 							final String line = lines.get(i);
 							if (i == 0) {
-								writer.write("benchmark,run,tool,budget," + line + "\r\n");
+								writer.write("project,benchmark,run,tool,budget," + line + "\r\n");
 								continue;
 							}
-							writer.write(benchName + "," + run + "," + tool + "," + budget + "," + line + "\r\n");
+							writer.write(project,benchName + "," + run + "," + tool + "," + budget + "," + line + "\r\n");
 						}
 
 					} catch (Exception e) {

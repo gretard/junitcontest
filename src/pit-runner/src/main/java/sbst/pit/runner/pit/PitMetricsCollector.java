@@ -14,7 +14,7 @@ import sbst.pit.runner.models.Request;
 public class PitMetricsCollector extends BaseCollector {
 
 	public PitMetricsCollector() {
-		super("mutations-summary.csv", "benchmark,run,tool,budget,file,class,mutator,method,line,status,killedBy\r\n");
+		super("mutations-summary.csv", "project,benchmark,run,tool,budget,file,class,mutator,method,line,status,killedBy\r\n");
 	}
 
 	private void extract(final Writer bufferedWriter, final Stream<Path> stream) {
@@ -26,10 +26,11 @@ public class PitMetricsCollector extends BaseCollector {
 				Path u = Paths.get(x.toString().split("temp")[0]);
 				final String run = u.getFileName().toString();
 				final String benchName = u.getFileName().toString().split("_")[0];
+				final String project = extractProject(benchName);
 				final String tool = u.getParent().toString().split("results_")[1].split("_")[0];
 				final String budget = u.getParent().toString().split("results_")[1].split("_")[1];
 				for (String line : FileUtils.readLines(x.toFile())) {
-					bufferedWriter.append(benchName + "," + run + "," + tool + "," + budget + "," + line + "\r\n");
+					bufferedWriter.append(project+","+benchName + "," + run + "," + tool + "," + budget + "," + line + "\r\n");
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
