@@ -48,8 +48,8 @@ public class App {
 		final String configFile = args.length > 3 ? args[3] : "/var/benchmarks/conf/benchmarks.list";
 
 		IExecutor[] runners = new IExecutor[] { new CompilationRunner(), new PitRuner(), new TestsRunner(),
-				new JacocoMetricsReporter(), new PitMetricsCollector(), new TestMetricsCollector(),
-				new ProjectMetricsCollector(), new JacocoMetricsCollector()
+				new JacocoMetricsReporter(), new PitMetricsCollector(), new JacocoMetricsCollector(),
+				new ProjectMetricsCollector(), new TestMetricsCollector()
 
 		};
 
