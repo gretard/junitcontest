@@ -6,6 +6,7 @@ import java.util.Arrays;
 import sbst.pit.runner.compilation.CompilationRunner;
 import sbst.pit.runner.junit.JacocoMetricsCollector;
 import sbst.pit.runner.junit.JacocoMetricsReporter;
+import sbst.pit.runner.junit.JacocoXMLMetricsCollector;
 import sbst.pit.runner.junit.TestsRunner;
 import sbst.pit.runner.metrics.ProjectMetricsCollector;
 import sbst.pit.runner.metrics.TestMetricsCollector;
@@ -48,8 +49,8 @@ public class App {
 		final String configFile = args.length > 3 ? args[3] : "/var/benchmarks/conf/benchmarks.list";
 
 		IExecutor[] runners = new IExecutor[] { new CompilationRunner(), new PitRuner(), new TestsRunner(),
-				new JacocoMetricsReporter(), new PitMetricsCollector(), new JacocoMetricsCollector(),
-				new ProjectMetricsCollector(), new TestMetricsCollector()
+				new JacocoMetricsReporter(), new JacocoMetricsCollector(), new JacocoXMLMetricsCollector(),
+				new PitMetricsCollector(), new ProjectMetricsCollector(), new TestMetricsCollector()
 
 		};
 
