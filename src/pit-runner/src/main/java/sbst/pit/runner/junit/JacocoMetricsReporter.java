@@ -57,6 +57,8 @@ public class JacocoMetricsReporter extends BaseRunner {
 			}
 			line.addArgument("--sourcefiles");
 			line.addArgument(String.join(",", request.bench.src));
+			line.addArgument("--xml");
+			line.addArgument(request.outDirectory.toFile().getAbsolutePath() + File.separator + "coverage.xml");
 			line.addArgument("--html");
 			line.addArgument(request.outDirectory.toFile().getAbsolutePath() + File.separator + "html");
 			line.addArgument("--csv");
