@@ -81,7 +81,7 @@ public class JacocoXMLMetricsCollector extends BaseCollector {
 							sb.append(",");
 							sb.append(missed);
 							sb.append("\r\n");
-
+							writer.write(sb.toString());
 						}
 
 					} catch (Exception e) {
