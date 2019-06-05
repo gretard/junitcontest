@@ -43,6 +43,8 @@ import sbst.runtool.SBSTChannel;
 
 public class RunTool {
 	private static final double EXTRA_TIME_FACTOR = 2.00;
+	
+	private static final long CONSTANT_TIME_FACTOR = 30000l;
 
 	private final File homeDir;
 	private final File executable;
@@ -144,7 +146,7 @@ public class RunTool {
 						// enfore time budget
 						try {
 							long budget_millis = timeBudget * 1000;
-							long extra_time_millis = (long) ((double) budget_millis * EXTRA_TIME_FACTOR);
+							long extra_time_millis = (long) ((double) budget_millis * EXTRA_TIME_FACTOR) + CONSTANT_TIME_FACTOR;
 							long timeout_millis = budget_millis + extra_time_millis;
 
 							Main.info(String.format(
