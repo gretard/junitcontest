@@ -17,9 +17,9 @@ public class ProjectMetricsCollector extends BaseCollector {
 	MetricsCollector collector = new MetricsCollector();
 
 	private void writeHeader(Writer writer) throws IOException {
-		writer.write("project\tbenchmark\tclassz" + "\tcomplexity" + "\tinstructions" + "\tnumberOfTests"
-				+ "\tnumberOfConsturctors" + "\tnumberOfMethods" + "\tpublicMethods" + "\tstaticMethods"
-				+ "\tnumberOfReturns" + "\toverridenMethods" + "\r\n");
+		writer.write("project,benchmark,classz" + ",complexity" + ",instructions" + ",numberOfTests"
+				+ ",numberOfConsturctors" + ",numberOfMethods" + ",publicMethods" + ",staticMethods"
+				+ ",numberOfReturns" + ",overridenMethods" + "\r\n");
 	}
 
 	@Override
@@ -27,8 +27,8 @@ public class ProjectMetricsCollector extends BaseCollector {
 		writeHeader(writer);
 		final Map<String, Bench> benchmarks = Utils.getBenchmarks(request.configFile);
 		benchmarks.forEach((k, v) -> {
-			v.additionalInfo = extractProject(k)+"\t"+k + "\t";
-			v.additionalInfoHeader = "project\tbenchmark\t";
+			v.additionalInfo = extractProject(k)+","+k + ",";
+			v.additionalInfoHeader = "project,benchmark,";
 			collector.collectMetrics(v, writer);
 		});
 

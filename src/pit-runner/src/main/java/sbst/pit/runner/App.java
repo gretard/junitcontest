@@ -13,6 +13,8 @@ import sbst.pit.runner.metrics.TestMetricsCollector;
 import sbst.pit.runner.models.Request;
 import sbst.pit.runner.pit.PitMetricsCollector;
 import sbst.pit.runner.pit.PitRuner;
+import sbst.pit.runner.testmetrics.TestMetricsCollector0;
+import sbst.pit.runner.testmetrics.TestMetricsRuner;
 
 /**
  * Hello world!
@@ -48,9 +50,10 @@ public class App {
 
 		final String configFile = args.length > 3 ? args[3] : "/var/benchmarks/conf/benchmarks.list";
 
-		IExecutor[] runners = new IExecutor[] { new CompilationRunner(), new PitRuner(), new TestsRunner(),
+		IExecutor[] runners = new IExecutor[] { new CompilationRunner(),new PitRuner(), new TestsRunner(),
 				new JacocoMetricsReporter(), new JacocoMetricsCollector(), new JacocoXMLMetricsCollector(),
-				new PitMetricsCollector(), new ProjectMetricsCollector(), new TestMetricsCollector()
+				new PitMetricsCollector(), new ProjectMetricsCollector(),
+				new TestMetricsRuner(), new TestMetricsCollector0()
 
 		};
 

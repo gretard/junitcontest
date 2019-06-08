@@ -76,9 +76,9 @@ public class MetricsCollector {
 		request.classes.forEach(k -> {
 			Metrics v = info.getOrDefault(k, new Metrics());
 			try {
-				outFile.write(request.additionalInfo + k + "\t" + v.complexity + "\t" + v.instructions + "\t"
-								+ v.numberOfTests + "\t" + v.noc + "\t" + v.nom + "\t" + v.nopm + "\t" + v.nosm + "\t"
-								+ v.nor + "\t" + v.noom + "\r\n"
+				outFile.write(request.additionalInfo + k + "," + v.complexity + "," + v.instructions + ","
+								+ v.numberOfTests + "," + v.noc + "," + v.nom + "," + v.nopm + "," + v.nosm + ","
+								+ v.nor + "," + v.noom + "\r\n"
 						);
 			} catch (IOException e) {
 				e.printStackTrace();

@@ -96,6 +96,7 @@ public abstract class BaseRunner implements IExecutor {
 					}
 				});
 			} catch (Exception ex) {
+				logError(request.baseDir, " ERROR " + ex.getMessage());
 				ex.printStackTrace();
 			}
 
@@ -109,7 +110,6 @@ public abstract class BaseRunner implements IExecutor {
 			logError(request.baseDir, " waiting for tasks: " + tasksCount.get() + " run: " + totalRun.get());
 
 		}
-		// service.awaitTermination(4, TimeUnit.HOURS);
 		service.shutdownNow();
 		logError(request.baseDir, " finished... tasks: " + tasksCount.get() + " total: " + totalCount.get()
 				+ " total run: " + totalRun.get());
