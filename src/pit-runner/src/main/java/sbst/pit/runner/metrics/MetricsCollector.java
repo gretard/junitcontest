@@ -19,7 +19,7 @@ import soot.Transform;
 import soot.options.Options;
 
 public class MetricsCollector {
-	public void collectMetrics(BaseRequest request, Writer outFile) {
+	public synchronized void collectMetrics(BaseRequest request, Writer outFile) {
 		soot.G.reset();
 		final StringBuffer sb = new StringBuffer();
 		sb.append(System.getProperty("java.class.path") + File.pathSeparator);
