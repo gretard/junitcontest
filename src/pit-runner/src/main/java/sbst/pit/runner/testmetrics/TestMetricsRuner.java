@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
+
 import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.BaseRunner;
 import sbst.pit.runner.RunnerRequest;
@@ -18,7 +20,7 @@ public class TestMetricsRuner extends BaseRunner {
 
 	private final MetricsCollector collector = new MetricsCollector();
 
-	@Override
+	@Override 
 	public int innerExecute(RunnerRequest request) {
 
 		
@@ -31,7 +33,11 @@ public class TestMetricsRuner extends BaseRunner {
 		} catch (Exception e) {
 			return 1;
 		}
-
+		try {
+			FileUtils.write(request.logFile.toFile(), "Metrics collected");
+		} catch (IOException e) {
+			return 1;
+		}
 		return 0;
 
 	}
