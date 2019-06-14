@@ -23,7 +23,7 @@ git clone https://github.com/crossoverJie/JCSprout.git 4-JCSprout
 ```
 for i in */; do
   newdir="./${i}/pom.xml"
-  mvn -DskipTests install dependency:copy-dependencies -f $newdir
+  mvn -DskipTests compile test-compile install dependency:copy-dependencies -f $newdir
 done
 ```
 
