@@ -22,9 +22,10 @@ public abstract class BaseCollector implements IExecutor {
 		this.fileName = fileName;
 		this.header = header;
 	}
-	
+
 	@Override
 	public void execute(Request request) throws Throwable {
+		System.out.println("Starting " + this.getClass().getSimpleName());
 		final Path outPath = Paths.get(request.baseDir, this.fileName);
 		final File outFile = outPath.toFile();
 		Utils.deleteOld(outPath, false);
@@ -42,12 +43,12 @@ public abstract class BaseCollector implements IExecutor {
 	}
 
 	protected abstract void collect(Writer writer, Request request) throws Throwable;
-	
+
 	protected static String extractProject(String name) {
-		if (name.length()<=7) {
+		if (name.length() <= 7) {
 			return name;
 		}
 		return name.substring(0, 7);
 	}
-	
+
 }

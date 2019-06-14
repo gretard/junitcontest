@@ -44,7 +44,7 @@ public class Utils {
 		if (!f.exists()) {
 			f.createNewFile();
 		}
-	
+
 		FileOutputStream outStream = new FileOutputStream(f, true);
 		FileOutputStream errStream = new FileOutputStream(f, true);
 		try {
@@ -54,7 +54,7 @@ public class Utils {
 			executor.setStreamHandler(streamHandler);
 			executor.setWorkingDirectory(baseDir);
 			int exitValue = executor.execute(line);
-		//	System.out.println("Run ok: "+line);
+			// System.out.println("Run ok: "+line);
 			return exitValue;
 		} catch (Throwable e) {
 			System.out.println("An exception occurred during the execution of command " + line.toString());
@@ -65,6 +65,7 @@ public class Utils {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Map<String, Bench> getBenchmarks(String configFile) throws ConfigurationException {
 		PropertyListConfiguration benchmarkList = new PropertyListConfiguration();
 		benchmarkList.load(new File(configFile));

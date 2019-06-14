@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.io.FileUtils;
 
 import sbst.pit.runner.App.Modes;
+import sbst.pit.runner.App.TestModes;
 import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.CompileRequest;
 import sbst.pit.runner.models.Request;
@@ -75,8 +77,8 @@ public abstract class BaseRunner implements IExecutor {
 					return;
 				}
 
-				RunnerRequest r = getTests(request.libsDir, benchmarks.get(benchName), base);
-				if (r.items.size() == 0) {
+				RunnerRequest r = getTests(request, benchmarks.get(benchName), base);
+				if (r.items.size() == 0 && r.oldTests.isEmpty()) {
 					return;
 				}
 
@@ -126,7 +128,6 @@ public abstract class BaseRunner implements IExecutor {
 	public void logError(String base, String line) {
 		try {
 			final String name = this.getClass().getSimpleName();
-
 			System.out.println(name + " " + line);
 			FileUtils.write(new File(base, "errrors.txt"), name + " " + line + "\r\n", true);
 		} catch (IOException e) {
@@ -134,13 +135,15 @@ public abstract class BaseRunner implements IExecutor {
 		}
 	}
 
-	public static RunnerRequest getTests(final String libsDir, Bench bench, final Path base) {
+	public static RunnerRequest getTests(final Request request, Bench bench, final Path base) {
+		final String libsDir = request.libsDir;
 		List<CompileRequest> tests = new ArrayList<>();
 		List<CompileRequest> other = new ArrayList<>();
 		List<CompileRequest> post = new ArrayList<>();
 		// RegTest
 		final Path generatedTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "testcases");
 		final Path compiledTestsDirectory = Paths.get(base.toFile().getAbsolutePath(), "bin");
+
 		try {
 
 			Files.walk(generatedTestsDirectory).filter(x -> x.toFile().getAbsolutePath().contains(".java"))
@@ -170,6 +173,7 @@ public abstract class BaseRunner implements IExecutor {
 						tests.add(r);
 
 					});
+
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 		}
@@ -177,12 +181,22 @@ public abstract class BaseRunner implements IExecutor {
 		main.addAll(other);
 		main.addAll(tests);
 		main.addAll(post);
-
+		if (!TestModes.RUNNEW.isSet(request.testsMode)) {
+			main.clear();
+		}
 		RunnerRequest r = new RunnerRequest();
 		r.bench = bench;
 		r.paths = libsDir;
 		r.testsPath = compiledTestsDirectory.toAbsolutePath().toFile().getAbsolutePath();
 		r.items.addAll(main);
+		final Path oldTests = Paths.get(base.toFile().getAbsolutePath(), "data", "reports", "old-tests.txt");
+		if (oldTests.toFile().exists() && TestModes.RUNOLD.isSet(request.testsMode)) {
+			try {
+				r.oldTests.addAll(Arrays.asList(FileUtils.readFileToString(oldTests.toFile()).split(",")));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		return r;
 	}
 

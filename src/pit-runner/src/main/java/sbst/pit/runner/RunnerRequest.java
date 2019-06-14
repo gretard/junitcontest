@@ -3,7 +3,9 @@ package sbst.pit.runner;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import sbst.pit.runner.models.Bench;
 import sbst.pit.runner.models.CompileRequest;
@@ -14,7 +16,7 @@ public class RunnerRequest {
 	public Path logFile;
 	public Path current;
 	public final List<CompileRequest> items = new ArrayList<CompileRequest>();
-
+	public final Set<String> oldTests = new HashSet<>();
 	public Path workingPath;
 
 	public String paths;
@@ -23,12 +25,13 @@ public class RunnerRequest {
 
 	public Path outDirectory;
 
-	
 	public List<String> getJacocoAllCps() {
 		List<String> cps = new ArrayList<>();
 		for (String x : bench.classpath) {
+			System.out.println(x);
 			String t = x;
 			if (!new File(t).exists() || x.endsWith("dependency")) {
+				System.out.println("Skipping " + t);
 				continue;
 			}
 

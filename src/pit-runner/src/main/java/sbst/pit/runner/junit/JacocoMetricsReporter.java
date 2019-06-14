@@ -8,12 +8,11 @@ import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 
+import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.BaseRunner;
 import sbst.pit.runner.RunnerRequest;
 import sbst.pit.runner.Utils;
-import sbst.pit.runner.App.Modes;
 import sbst.pit.runner.models.CompileRequest;
-import sbst.pit.runner.models.Request;
 
 public class JacocoMetricsReporter extends BaseRunner {
 	public JacocoMetricsReporter() {
@@ -30,6 +29,7 @@ public class JacocoMetricsReporter extends BaseRunner {
 			}
 			tests.add(item.testName);
 		}
+		tests.addAll(r.oldTests);
 		if (tests.isEmpty()) {
 			return -1;
 		}
@@ -63,6 +63,7 @@ public class JacocoMetricsReporter extends BaseRunner {
 			line.addArgument(request.outDirectory.toFile().getAbsolutePath() + File.separator + "html");
 			line.addArgument("--csv");
 			line.addArgument(request.outDirectory.toFile().getAbsolutePath() + File.separator + "coverage.csv");
+			System.out.println("Running with: " + line);
 			return Utils.launch(request.workingPath.toFile(), line, request.logFile);
 		} catch (Throwable e) {
 			e.printStackTrace();

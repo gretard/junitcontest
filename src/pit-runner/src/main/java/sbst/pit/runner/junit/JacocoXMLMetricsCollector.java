@@ -48,43 +48,51 @@ public class JacocoXMLMetricsCollector extends BaseCollector {
 						NodeList counters = doc.getElementsByTagName("counter");
 						for (int i = 0; i < counters.getLength(); i++) {
 							Node counter = counters.item(i);
-							if (counter.getParentNode() == null || counter.getParentNode().getParentNode() == null) {
-								continue;
+
+							try {
+								if (counter == null || counter.getParentNode() == null
+										|| counter.getParentNode().getParentNode() == null) {
+									continue;
+								}
+								String type = counter.getAttributes().getNamedItem("type").getTextContent();
+								String missed = counter.getAttributes().getNamedItem("missed").getTextContent();
+								String covered = counter.getAttributes().getNamedItem("covered").getTextContent();
+								String methodName = counter.getParentNode().getAttributes().getNamedItem("name")
+										.getTextContent().replace('/', '.');
+
+								String classzName = counter.getParentNode().getParentNode().getAttributes()
+										.getNamedItem("name").getTextContent().replace('/', '.');
+
+								StringBuilder sb = new StringBuilder();
+								sb.append(project);
+								sb.append(",");
+								sb.append(benchName);
+								sb.append(",");
+								sb.append(classzName);
+								sb.append(",");
+								sb.append(methodName);
+								sb.append(",");
+								sb.append(run);
+								sb.append(",");
+								sb.append(tool);
+								sb.append(",");
+								sb.append(budget);
+								sb.append(",");
+								sb.append(type);
+								sb.append(",");
+								sb.append(covered);
+								sb.append(",");
+								sb.append(missed);
+								sb.append("\r\n");
+								writer.write(sb.toString());
+							} catch (Exception e) {
+								System.out.println("Error reading "+counter+" in file "+x);
+								e.printStackTrace();
 							}
-							String type = counter.getAttributes().getNamedItem("type").getTextContent();
-							String missed = counter.getAttributes().getNamedItem("missed").getTextContent();
-							String covered = counter.getAttributes().getNamedItem("covered").getTextContent();
-							String methodName = counter.getParentNode().getAttributes().getNamedItem("name")
-									.getTextContent().replace('/', '.');
-
-							String classzName = counter.getParentNode().getParentNode().getAttributes()
-									.getNamedItem("name").getTextContent().replace('/', '.');
-
-							StringBuilder sb = new StringBuilder();
-							sb.append(project);
-							sb.append(",");
-							sb.append(benchName);
-							sb.append(",");
-							sb.append(classzName);
-							sb.append(",");
-							sb.append(methodName);
-							sb.append(",");
-							sb.append(run);
-							sb.append(",");
-							sb.append(tool);
-							sb.append(",");
-							sb.append(budget);
-							sb.append(",");
-							sb.append(type);
-							sb.append(",");
-							sb.append(covered);
-							sb.append(",");
-							sb.append(missed);
-							sb.append("\r\n");
-							writer.write(sb.toString());
 						}
 
 					} catch (Exception e) {
+					
 						e.printStackTrace();
 					}
 

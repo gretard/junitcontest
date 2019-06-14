@@ -20,17 +20,18 @@ public class TestMetricsRuner extends BaseRunner {
 
 	private final MetricsCollector collector = new MetricsCollector();
 
-	@Override 
+	@Override
 	public int innerExecute(RunnerRequest request) {
 
-		
 		BaseRequest r = new BaseRequest();
 		request.items.stream().map(x -> x.testName).forEach(c -> r.classes.add(c));
 		r.classpath.addAll(request.allPaths());
+		r.classes.addAll(request.oldTests);
 		File outFile = new File(request.outDirectory.toFile(), "metrics.csv");
 		try (FileWriter writer = new FileWriter(outFile)) {
 			collector.collectMetrics(r, writer);
 		} catch (Exception e) {
+			e.printStackTrace();
 			return 1;
 		}
 		try {

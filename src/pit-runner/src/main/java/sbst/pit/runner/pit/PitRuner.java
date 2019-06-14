@@ -31,6 +31,8 @@ public class PitRuner extends BaseRunner {
 			}
 			names.add(item.testName);
 		}
+		names.addAll(request.oldTests);
+
 		if (names.isEmpty()) {
 			System.out.println("No tests found");
 			return -1;

@@ -1,8 +1,5 @@
 package sbst.pit.runner.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import sbst.pit.runner.App.Modes;
 
 public class Request {
@@ -10,5 +7,6 @@ public class Request {
 	public int mode = Modes.DEFAULT.getMode();
 	public String baseDir = ".";
 	public String libsDir = "./libs";
+	public int testsMode;
 
 }

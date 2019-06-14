@@ -33,6 +33,7 @@ public class TestsRunner extends BaseRunner {
 			}
 			names.add(item.testName);
 		}
+		names.addAll(request.oldTests);
 		if (names.isEmpty()) {
 			return -1;
 		}
