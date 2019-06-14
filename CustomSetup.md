@@ -12,10 +12,11 @@ apt-get -y install git maven wget
 ```
 cd /var/benchmarks/projects
 rm -R *
-git clone https://github.com/JodaOrg/joda-time.git
-git clone https://github.com/JodaOrg/joda-money.git
-git clone https://github.com/jfree/jfreechart.git
-git clone https://github.com/jhy/jsoup.git
+git clone https://github.com/pedrovgs/Algorithms.git 0-algorithms
+git clone https://github.com/JodaOrg/joda-money.git 1-joda-money
+git clone https://github.com/jhy/jsoup.git 2-jsoup
+git clone https://github.com/apache/commons-cli.git 3-commons-cli
+git clone https://github.com/crossoverJie/JCSprout.git 4-JCSprout
 ```
 
 ## compile
