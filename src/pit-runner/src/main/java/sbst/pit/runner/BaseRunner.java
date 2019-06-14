@@ -46,6 +46,7 @@ public abstract class BaseRunner implements IExecutor {
 		AtomicLong tasksCount = new AtomicLong();
 		AtomicLong totalCount = new AtomicLong();
 		AtomicLong totalRun = new AtomicLong();
+		AtomicLong totalErrors = new AtomicLong();
 
 		Files.walk(Paths.get(request.baseDir), 9999).forEach(e -> {
 
@@ -92,27 +93,31 @@ public abstract class BaseRunner implements IExecutor {
 						r.outDirectory = outDirectory;
 						if (innerExecute(r) != 0) {
 							logError(request.baseDir, " ERROR " + base.toFile().getAbsolutePath());
+							totalErrors.incrementAndGet();
 						}
 					}
 				});
 			} catch (Exception ex) {
-				logError(request.baseDir, " ERROR " + ex.getMessage());
+				logError(request.baseDir, "Unexpected ERROR " + ex.getMessage());
 				ex.printStackTrace();
+				totalErrors.incrementAndGet();
 			}
 
 		});
 
 		service.shutdown();
-		logError(request.baseDir, " waiting for finish... tasks: " + tasksCount.get() + " total: " + totalCount.get());
+		logError(request.baseDir, " waiting for finish... tasks: " + tasksCount.get() + " total: " + totalCount.get()
+				+ " errros: " + totalErrors.get());
 		long start = System.currentTimeMillis();
 		while (!service.isTerminated() && (System.currentTimeMillis() - start) < TimeUnit.HOURS.toMillis(4)) {
 			Thread.sleep(TimeUnit.MINUTES.toMillis(2));
-			logError(request.baseDir, " waiting for tasks: " + tasksCount.get() + " run: " + totalRun.get());
+			logError(request.baseDir, " waiting for tasks: " + tasksCount.get() + " run: " + totalRun.get()
+					+ " errros: " + totalErrors.get());
 
 		}
 		service.shutdownNow();
 		logError(request.baseDir, " finished... tasks: " + tasksCount.get() + " total: " + totalCount.get()
-				+ " total run: " + totalRun.get());
+				+ " total run: " + totalRun.get() + " errros: " + totalErrors.get());
 
 	}
 
