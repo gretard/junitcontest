@@ -79,7 +79,7 @@ public class BenchmarksGenerator {
 			final List<String> testClasses0 = new LinkedList<>();
 			final List<String> testClasses = new LinkedList<>();
 
-			if (testsOnly && testClassesDir.exists()) {
+			if (testClassesDir.exists()) {
 				classpath.add(testClassesDir.getAbsolutePath());
 				fillClasses(testClassesDir, null, testClasses0);
 			}
