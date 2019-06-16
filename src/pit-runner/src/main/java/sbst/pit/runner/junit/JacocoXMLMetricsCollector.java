@@ -86,13 +86,12 @@ public class JacocoXMLMetricsCollector extends BaseCollector {
 								sb.append("\r\n");
 								writer.write(sb.toString());
 							} catch (Exception e) {
-								System.out.println("Error reading "+counter+" in file "+x);
-								e.printStackTrace();
+
 							}
 						}
 
 					} catch (Exception e) {
-					
+
 						e.printStackTrace();
 					}
 
