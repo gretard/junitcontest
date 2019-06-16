@@ -14,7 +14,7 @@ import sbst.pit.runner.models.Request;
 public class TestMetricsCollector0 extends BaseCollector {
 
 	public TestMetricsCollector0() {
-		super("tests-summary.csv", "project,benchmark,run,tool,budget,class,complexity,instructions,numberOfTests,"
+		super("tests-summary.csv", "project,benchmark,run,tool,budget,classz,complexity,instructions,numberOfTests,"
 				+ "numberOfConsturctors,numberOfMethods,publicMethods,staticMethods,numberOfReturns,overridenMethods\r\n");
 	}
 
