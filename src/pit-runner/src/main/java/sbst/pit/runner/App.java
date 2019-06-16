@@ -11,6 +11,7 @@ import sbst.pit.runner.metrics.ProjectMetricsCollector;
 import sbst.pit.runner.models.Request;
 import sbst.pit.runner.pit.PitMetricsCollector;
 import sbst.pit.runner.pit.PitRuner;
+import sbst.pit.runner.testmetrics.TestMetrics2Collector;
 import sbst.pit.runner.testmetrics.TestMetricsCollector0;
 import sbst.pit.runner.testmetrics.TestMetricsRuner;
 
@@ -73,10 +74,9 @@ public class App {
 
 				new CompilationRunner(), new PitRuner(), new PitMetricsCollector(), new TestsRunner(),
 				new JacocoMetricsReporter(), new JacocoXMLMetricsCollector(), new ProjectMetricsCollector(),
-				new TestMetricsRuner(), new TestMetricsCollector0(), new HtmlExecutor()
+				new TestMetricsRuner(), new TestMetricsCollector0(), new TestMetrics2Collector(), new HtmlExecutor()
 
 		};
-
 		Request request = new Request();
 		request.baseDir = new File(baseDir).getAbsolutePath();
 		request.configFile = configFile;
