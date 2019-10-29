@@ -124,6 +124,8 @@ cd /home/junit/libs
 wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pitest-1.4.5.jar
 wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pitest-command-line-1.4.5.jar
 wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pitest-entry-1.4.5.jar
+wget https://repo1.maven.org/maven2/junit/junit/4.12/junit-4.12.jar
+wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-all/1.3/hamcrest-all-1.3.jar
 
 
 cd /home/junit/tools
