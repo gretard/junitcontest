@@ -17,6 +17,7 @@ git clone https://github.com/JodaOrg/joda-money.git 1-joda-money
 git clone https://github.com/jhy/jsoup.git 2-jsoup
 git clone https://github.com/apache/commons-cli.git 3-commons-cli
 git clone https://github.com/crossoverJie/JCSprout.git 4-JCSprout
+git clone https://github.com/jhy/jsoup.git 5-jsoup
 ```
 
 ## compile
