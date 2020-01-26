@@ -120,7 +120,9 @@ wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pite
 wget https://github.com/hcoles/pitest/releases/download/pitest-parent-1.4.5/pitest-entry-1.4.5.jar
 wget https://repo1.maven.org/maven2/junit/junit/4.12/junit-4.12.jar
 wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-all/1.3/hamcrest-all-1.3.jar
-
+wget https://repo1.maven.org/maven2/org/jacoco/jacoco/0.8.5/jacoco-0.8.5.zip
+unzip jacoco-0.8.5.zip
+cp -R lib/*.jar .
 
 cd /home/junit/tools
 java -jar runner-0.0.1-SNAPSHOT-jar-with-dependencies.jar
