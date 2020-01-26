@@ -33,6 +33,7 @@ done
 ```
 cd /home/junit
 mvn clean install -f ./src/benchgenerator/pom.xml
+java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" 
 ```
 ## Generate classes
 ```
