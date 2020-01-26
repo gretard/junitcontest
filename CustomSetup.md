@@ -33,15 +33,7 @@ done
 cd /home/junit
 mvn clean install -f ./src/benchgenerator/pom.xml
 java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" 
-```
-## Generate classes
-```
-java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list" 9999 true /home/junit/tools/project-stats.csv false;
 cat /var/benchmarks/conf/benchmarks.list
-```
-## Generate test classes for augmenting
-```
-java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list" 9999 true /home/junit/tools/project-stats.csv true
 ```
 # Setup pit runner for analysis
 ```
@@ -53,7 +45,7 @@ cp ./src/pit-runner/target/*.jar ./tools/
 
 
 
-## Benchmark tool
+# Benchmark tool
 ```
 cd /home/junit
 
@@ -66,9 +58,9 @@ cp ./src/benchmarktool/target/benchmarktool-1.0.0-shaded.jar /usr/local/bin/lib
 cd /home/junit;
 mvn -DskipTests clean install -f ./src/sbstcontest/pom.xml
 
-mkdir ./tools/atg/lib;
-mkdir ./tools/evosuite/lib;
-mkdir ./tools/randoop/lib;
+mkdir -p ./tools/atg/lib;
+mkdir -p ./tools/evosuite/lib;
+mkdir -p ./tools/randoop/lib;
 cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/atg/lib;
 cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/evosuite/lib;
 cp ./src/sbstcontest/target/runtool-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./tools/randoop/lib;
@@ -143,4 +135,15 @@ COLUMNS[5] as mutationType,
 COLUMNS[5] || '_' || COLUMNS[4] || '_' || COLUMNS[6] ||  '_' || COLUMNS[7] as mutationId,
 COLUMNS[8] as status
 from dfs.`/home/junit/tools/summary.txt`
+```
+
+
+## Generate classes
+```
+java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list" 9999 true /home/junit/tools/project-stats.csv false;
+cat /var/benchmarks/conf/benchmarks.list
+```
+## Generate test classes for augmenting
+```
+java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list" 9999 true /home/junit/tools/project-stats.csv true
 ```
