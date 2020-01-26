@@ -36,7 +36,8 @@ java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-de
 ```
 ## Generate classes
 ```
-java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list" 9999 true /home/junit/tools/project-stats.csv false
+java -jar "./src/benchgenerator/target/benchgenerator-0.0.1-SNAPSHOT-jar-with-dependencies.jar" "/var/benchmarks/projects" "/var/benchmarks/conf/benchmarks.list" 9999 true /home/junit/tools/project-stats.csv false;
+cat /var/benchmarks/conf/benchmarks.list
 ```
 ## Generate test classes for augmenting
 ```
