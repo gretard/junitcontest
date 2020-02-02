@@ -29,7 +29,7 @@ public class HtmlExecutor implements IExecutor {
 		FileUtils.write(out, "<th>compiled</th>", true);
 		FileUtils.write(out, "<th>coverage</th>", true);
 		FileUtils.write(out, "<th>mutations</th>", true);
-		FileUtils.write(out, "</tr>>", true);
+		FileUtils.write(out, "</tr>", true);
 
 		StringBuilder sb = new StringBuilder();
 		Path base = Paths.get(request.baseDir);
