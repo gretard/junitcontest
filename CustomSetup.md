@@ -5,7 +5,7 @@ sudo docker run -v /vagrant/junitcontest:/home/junit --name=junitcontest -it doc
 ```
 ## docker
 ```
-apt-get update && apt-get -y install git maven wget
+apt-get update && apt-get -y install git maven wget unzip
 ```
 ## projects setup
 ```
