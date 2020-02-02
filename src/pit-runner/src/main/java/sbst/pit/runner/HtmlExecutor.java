@@ -54,7 +54,7 @@ public class HtmlExecutor implements IExecutor {
 				Path compiled = Paths.get(f.getAbsolutePath(), "temp", "bin");
 				String run = f.getName();
 				String benchmark = f.getName().split("_")[0];
-				System.out.println(f.getName());
+	
 				sb.append("<tr>");
 
 				sb.append("<td>");
@@ -66,7 +66,7 @@ public class HtmlExecutor implements IExecutor {
 				sb.append("</td>");
 
 				sb.append("<td>");
-				sb.append("<a href='" + f.getAbsolutePath() + "' target='_blank'>");
+				sb.append("<a href='" + out.toPath().getParent().relativize(f.toPath()) + "' target='_blank'>");
 				sb.append(benchmark);
 				sb.append("</a>");
 				sb.append("</td>");
@@ -76,19 +76,19 @@ public class HtmlExecutor implements IExecutor {
 				sb.append("</td>");
 
 				sb.append("<td>");
-				sb.append("<a href='" + out.toPath().relativize(compiled).toString() + "' target='_blank'>");
+				sb.append("<a href='" + out.toPath().getParent().relativize(compiled).toString() + "' target='_blank'>");
 				sb.append(compiled.toFile().listFiles().length > 0);
 				sb.append("</a>");
 				sb.append("</td>");
 
 				sb.append("<td>");
-				sb.append("<a href='" + out.toPath().relativize(coverage).toString() + "' target='_blank'>");
+				sb.append("<a href='" + out.toPath().getParent().relativize(coverage).toString() + "' target='_blank'>");
 				sb.append(coverage.toFile().exists());
 				sb.append("</a>");
 				sb.append("</td>");
 
 				sb.append("<td>");
-				sb.append("<a href='" + out.toPath().relativize(muts).toString() + "' target='_blank'>");
+				sb.append("<a href='" + out.toPath().getParent().relativize(muts).toString() + "' target='_blank'>");
 				sb.append(muts.toFile().exists());
 				sb.append("</a>");
 				sb.append("</td>");
@@ -98,9 +98,9 @@ public class HtmlExecutor implements IExecutor {
 			}
 		});
 		FileUtils.write(out, sb.toString(), true);
-
+		
 		FileUtils.write(out, "</table></body></html>", true);
-
+		System.out.println(out.getAbsolutePath());
 	}
 
 }
