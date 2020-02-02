@@ -1,7 +1,6 @@
 package sbst.pit.runner;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,45 +16,90 @@ public class HtmlExecutor implements IExecutor {
 
 	@Override
 	public void execute(Request request) throws Throwable {
-		File outDir = Paths.get(request.baseDir, "summaryDirs").toFile();
 
 		File out = Paths.get(request.baseDir, "summary.html").toFile();
 		out.delete();
-		FileUtils.deleteDirectory(outDir);
-		FileUtils.write(out, "<html><body><ul>", true);
+		// FileUtils.deleteDirectory(outDir);
+		FileUtils.write(out, "<html><body><table>", true);
+		FileUtils.write(out, "<tr>", true);
+		FileUtils.write(out, "<th>tool</th>", true);
+		FileUtils.write(out, "<th>budget</th>", true);
+		FileUtils.write(out, "<th>benchmark</th>", true);
+		FileUtils.write(out, "<th>run</th>", true);
+		FileUtils.write(out, "<th>compiled</th>", true);
+		FileUtils.write(out, "<th>coverage</th>", true);
+		FileUtils.write(out, "<th>mutations</th>", true);
+		FileUtils.write(out, "</tr>>", true);
+
+		StringBuilder sb = new StringBuilder();
 		Path base = Paths.get(request.baseDir);
 		Files.walk(base).filter(p -> {
+			File f = p.toFile();
+			if (f.getName().contains("results")) {
+				return true;
+			}
+			return false;
+		}).distinct().forEach(p -> {
+			File root = p.toFile();
+			String[] info = root.getName().split("_");
+			String tool = info[1];
+			String budget = info[2];
 
-			return p.endsWith(Paths.get("temp", "pit-reports", "index.html"))
+			for (File f : p.toFile().listFiles()) {
 
-					|| p.endsWith(Paths.get("temp", "coverage-reports", "html", "index.html"));
-		}).forEach(p -> {
-			try {
-				Path t = base.relativize(p);
-				File copyTo = Paths.get(outDir.getAbsolutePath(), t.getParent().toString()).toFile();
-				File copyFrom = p.getParent().toFile();
-				FileUtils.copyDirectory(copyFrom, copyTo);
-			} catch (Exception e) {
-				e.printStackTrace();
+				Path muts = Paths.get(f.getAbsolutePath(), "temp", "pit-reports", "index.html");
+
+				Path coverage = Paths.get(f.getAbsolutePath(), "temp", "coverage-reports", "html", "index.html");
+
+				Path compiled = Paths.get(f.getAbsolutePath(), "temp", "bin");
+				String run = f.getName();
+				String benchmark = f.getName().split("_")[0];
+				System.out.println(f.getName());
+				sb.append("<tr>");
+
+				sb.append("<td>");
+				sb.append(tool);
+				sb.append("</td>");
+
+				sb.append("<td>");
+				sb.append(budget);
+				sb.append("</td>");
+
+				sb.append("<td>");
+				sb.append("<a href='" + f.getAbsolutePath() + "' target='_blank'>");
+				sb.append(benchmark);
+				sb.append("</a>");
+				sb.append("</td>");
+
+				sb.append("<td>");
+				sb.append(run);
+				sb.append("</td>");
+
+				sb.append("<td>");
+				sb.append("<a href='" + out.toPath().relativize(compiled).toString() + "' target='_blank'>");
+				sb.append(compiled.toFile().listFiles().length > 0);
+				sb.append("</a>");
+				sb.append("</td>");
+
+				sb.append("<td>");
+				sb.append("<a href='" + out.toPath().relativize(coverage).toString() + "' target='_blank'>");
+				sb.append(coverage.toFile().exists());
+				sb.append("</a>");
+				sb.append("</td>");
+
+				sb.append("<td>");
+				sb.append("<a href='" + out.toPath().relativize(muts).toString() + "' target='_blank'>");
+				sb.append(muts.toFile().exists());
+				sb.append("</a>");
+				sb.append("</td>");
+
+				sb.append("</tr>");
+
 			}
 		});
-		Files.walk(outDir.toPath()).filter(p -> {
-			return p.endsWith(Paths.get("temp", "pit-reports", "index.html"))
-					|| p.endsWith(Paths.get("temp", "coverage-reports", "html", "index.html"));
-		}).forEach(p -> {
-			Path t = outDir.toPath().relativize(p);
-			try {
-				StringBuilder sb = new StringBuilder();
-				sb.append(String.format("<li><a href='%s'>", t.toString()));
-				sb.append(t.toString());
-				sb.append("</a></li>\r\n");
-				FileUtils.write(out, sb.toString(), true);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		FileUtils.write(out, sb.toString(), true);
 
-		});
-		FileUtils.write(out, "</ul></body></html>", true);
+		FileUtils.write(out, "</table></body></html>", true);
 
 	}
 
